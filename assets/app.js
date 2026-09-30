@@ -1,0 +1,1 @@
+document.getElementById('btnProgramas').addEventListener('click',()=>alert('Banco revisado será conectado nesta área.'));document.getElementById('btnLivre').addEventListener('click',()=>alert('Módulo Frequência Livre será conectado nesta área.'));
