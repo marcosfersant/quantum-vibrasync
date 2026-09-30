@@ -1,0 +1,23 @@
+{
+  "schema": "quantum-vibrasync-revisao-v1",
+  "projeto": "Quantum VibraSync",
+  "base_principal": {
+    "arquivo": "quantum_vibrasync_v5_banco_90893.html",
+    "programas": 90893,
+    "regra": "preservar IDs, frequencias, duracao, onda, fonte e comandos originais"
+  },
+  "regras": {
+    "programa_e_unidade": true,
+    "nao_separar_frequencias_como_programas": true,
+    "mesmo_nome_frequencias_diferentes": "manter e numerar 1, 2, 3...",
+    "duplicacao_real": "somente quando programa e conjunto de frequencias forem efetivamente iguais",
+    "multiplas_categorias": "permitido por copia/classificacao sem apagar a origem quando pertinente"
+  },
+  "revisoes_finais": {
+    "tireoide": {"status":"concluida","programas":43},
+    "virus": {"status":"concluida","programas_no_arquivo_real":605},
+    "sintomas_e_cuidados_gerais": {"status":"concluida","programas_no_arquivo_real":156}
+  },
+  "categorias_cruzadas": ["Cancer e tumores","Hormônios e glândulas","DNA e genética","Desintoxicação e suporte"],
+  "status": "consolidacao_em_andamento"
+}
