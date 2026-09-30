@@ -1,0 +1,27 @@
+{
+  "projeto": "Quantum VibraSync",
+  "tipo": "mapa-de-fontes-da-revisao",
+  "fontes_confirmadas": [
+    "quantum_vibrasync_v5_banco_90893.html",
+    "Nomes_editaveis_Tireoide.xlsx",
+    "Nomes_editaveis_Tireoide.txt",
+    "Nomes_editaveis_Virus.xlsx",
+    "Nomes_editaveis_Sintomas_e_cuidados_gerais.xlsx",
+    "Nomes_editaveis_Cancer_e_tumores.xlsx",
+    "Nomes_editaveis_Hormonios_e_glandulas.xlsx",
+    "Nomes_editaveis_Bem_estar_e_praticas_integrativas.xlsx",
+    "Nomes_editaveis_Boca_dentes_e_garganta.xlsx",
+    "Nomes_editaveis_Celulas_tecidos_e_regeneracao.xlsx",
+    "Nomes_editaveis_Coracao_e_circulacao.xlsx",
+    "Nomes_editaveis_Digestivo_e_abdomen.xlsx",
+    "Nomes_editaveis_Figado_e_vesicula.xlsx",
+    "Nomes_editaveis_Imunidade_e_alergias.xlsx",
+    "Nomes_editaveis_Respiratorio_nariz_e_seios_da_face.xlsx"
+  ],
+  "principio": "As planilhas corrigem nomenclatura/classificacao; os parametros de frequencia permanecem vinculados ao programa original da base.",
+  "nao_fazer": [
+    "nao transformar frequencias individuais em programas",
+    "nao substituir a base original antes da validacao",
+    "nao misturar com o repositorio fersant-connect"
+  ]
+}
