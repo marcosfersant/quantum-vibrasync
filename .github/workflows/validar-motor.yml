@@ -1,0 +1,27 @@
+name: Validar motor VibraSync
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validar V8
+        shell: python
+        run: |
+          import re, pathlib, sys
+          p=pathlib.Path("quantum_vibrasync_v8_90893.html")
+          s=p.read_text(encoding="utf-8")
+          checks={
+            "arquivo V8": p.exists(),
+            "banco 90893": "90893" in s,
+            "limite 20 kHz": bool(re.search(r"20000|20\.000",s)),
+            "onda registrada": bool(re.search(r"\bwave\b",s,re.I)),
+            "WebAudio/oscilador": bool(re.search(r"Oscillator|createOscillator",s,re.I)),
+            "Box": "VibraSync Box" in s,
+            "sequencia/etapas": bool(re.search(r"step|etapa|sequence|sequ",s,re.I)),
+          }
+          for k,v in checks.items(): print(("PASS" if v else "FAIL"),k)
+          if not all(checks.values()): sys.exit(1)
