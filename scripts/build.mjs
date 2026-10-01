@@ -64,5 +64,14 @@ for(const row of index){
  }
 
 }
+// Recovered V5 memberships are prepared offline, never recalculated in the browser.
+const recovery=JSON.parse(fs.readFileSync('recuperacao-traducoes/v5-organizacao.json'));
+const byId=new Map(index.map(r=>[r[0],r]));
+for(const [id,areas,name,visible] of recovery.additions){
+ const row=byId.get(id);if(!row)throw Error('ID V5 ausente: '+id);
+ row[6]=[...new Set([...row[6],...areas])];
+ if(name&&row[1]===originals.get(id)[1])row[1]=name;
+ if(visible)row[7]=true;
+}
 fs.writeFileSync('dist/data/indice.json',JSON.stringify(index));
 console.log('Classificação de saída:',index.reduce((a,r)=>(a[r[4]]=(a[r[4]]||0)+1,a),{}));
