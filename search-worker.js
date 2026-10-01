@@ -13,7 +13,7 @@ function qvNomeBase(nome){
   return s||String(nome||'Programa sem nome');
 }
 
-let rows=[],keys=[],areas=[],groups=new Map();
+let rows=[],keys=[],areas=[],groups=new Map(),lastSearch=null,lastList=[],lastPrograms=0;
 const normalize=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 onmessage=async({data})=>{try{
  if(data.type==='load'){
@@ -25,11 +25,14 @@ onmessage=async({data})=>{try{
  const g=groups.get(data.key);if(!g)return;
  postMessage({type:'packages',request:data.request,key:data.key,name:g.name,count:g.rows.length,page:data.page,rows:g.rows.slice(data.page*50,(data.page+1)*50)});
  }else{
+ const searchKey=JSON.stringify([data.q,data.bank,data.area]);
+ if(searchKey===lastSearch){postMessage({type:'results',request:data.request,count:lastList.length,programs:lastPrograms,page:data.page,groups:lastList.slice(data.page*50,(data.page+1)*50)});return;}
  const q=normalize(data.q).trim().split(/\s+/).filter(Boolean);groups=new Map();let programs=0;
- rows.forEach((r,i)=>{if((!data.bank||r[2]===data.bank)&&(!data.area||data.area==='indice'||(r[6]||[]).includes(data.area))&&q.every(t=>keys[i].includes(t))){
+ rows.forEach((r,i)=>{if((data.area==='indice'||r[7]!==false)&&(!data.bank||r[2]===data.bank)&&(!data.area||data.area==='indice'||(r[6]||[]).includes(data.area))&&q.every(t=>keys[i].includes(t))){
  const name=qvNomeBase(r[1]),key=normalize(name);if(!groups.has(key))groups.set(key,{key,name,rows:[]});groups.get(key).rows.push(r);programs++;
  }});
  const list=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+ lastSearch=searchKey;lastPrograms=programs;lastList=list.map(g=>({key:g.key,name:g.name,count:g.rows.length}));
  postMessage({type:'results',request:data.request,count:list.length,programs,page:data.page,groups:list.slice(data.page*50,(data.page+1)*50).map(g=>({key:g.key,name:g.name,count:g.rows.length}))});
  }
 }catch(e){postMessage({type:'error',message:e.message})}};

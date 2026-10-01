@@ -1,7 +1,7 @@
 // Syntax reference: official Spooky2 User's Guide 2025-01-24, pp.73–74,142.
 // Operational output policy, not a universal hearing threshold. Zero is a programmed rest.
-export function requiresBox(hz,endHz=hz){return !(hz===0&&endHz===0)&&(Math.min(hz,endHz)<=20||Math.max(hz,endHz)>=18000)}
-export const BOX_MESSAGE='Requer Box gerador de frequências — não conectado. Faixa reservada ao Box: até 20 Hz e a partir de 18.000 Hz. Sequência original preservada.';
+export function requiresBox(hz,endHz=hz){return !(hz===0&&endHz===0)&&(Math.max(hz,endHz)>=20000)}
+export const BOX_MESSAGE='Requer Box gerador de frequências — não conectado. Gerador acima de 20.000 Hz não conectado. Sequência original preservada.';
 export const waveMap={1:'sine',2:'square',3:'sawtooth',5:'triangle'};
 const NUMBER='(?:\\d+(?:\\.\\d*)?|\\.\\d+)';
 const TARGET=new RegExp(`^(\\[[^\\]]+\\]|(?:BLR|BCR|BLm|BCm|BL|BC|B|M|L)?${NUMBER})(?:-(${NUMBER}))?`);
@@ -25,10 +25,11 @@ export function compile(row){
  const raw=String(row[4]||'').trim(),tokens=raw.split(',').map(s=>s.trim());if(tokens.at(-1)==='')tokens.pop();
  let parsed;try{if(!tokens.length||tokens.some(s=>!s))throw Error('Sequência vazia ou incompleta');parsed=tokens.map(s=>parseCommand(s,row[6]));}catch(e){return {error:e.message,code:'syntax',steps:[],parsed:[]}}
  let wave=waveMap[row[7]],reasons=[];const steps=[];
+ if(/infrared|infravermelh|\blaser\b|red light|luz vermelha|light mat|placa luminosa|beam ray|feixe de luz|\bpemf\b|pulsed e(?:lectric|lectromagnetic)? field|campo eletromagnetico pulsado/i.test(row[1]))reasons.push({code:'external',text:BOX_MESSAGE});
  if(!wave)reasons.push({code:'wave',text:'Forma de onda original ainda não suportada.'});
  for(const p of parsed){
   for(const d of p.directives){if(d.command==='W'&&waveMap[d.value])wave=waveMap[d.value];else reasons.push({code:'hardware',text:`Diretiva ${d.command}${d.value} exige saída ou configuração de hardware compatível.`})}
-  if(p.prefix!=='Hz'){reasons.push({code:'conversion',text:`${labels[p.prefix]||p.prefix}: conversão ainda não validada com os fatores do Spooky2.`});continue}
+  if(p.prefix!=='Hz'){reasons.push({code:'external',text:`${labels[p.prefix]||p.prefix}: requer Box gerador de frequências. Comando original preservado.`});continue}
   if(requiresBox(p.value,p.end))reasons.push({code:'external',text:BOX_MESSAGE});
   steps.push({hz:p.value,endHz:p.end,seconds:p.seconds,wave,rest:p.value===0&&p.end===0});
  }
