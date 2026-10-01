@@ -25,3 +25,12 @@ for(const id of [71263,74623,77130,78518,78610,61255,61335,64047,84762,89157]){
 for(const id of [48618,87962,87963])assert(!index.find(r=>r[0]===id)[6].includes('tireoide'));
 for(const id of [69496,72718,72747])assert(index.find(r=>r[0]===id)[6].includes('cancer'));
 console.log('PASS: tireoide recuperada, pastas originais mantidas, homônimos excluídos');
+
+const recovered=JSON.parse(fs.readFileSync('recuperacao-traducoes/v5-organizacao.json'));
+for(const [id,areas,name,visible] of recovered.additions){
+ const row=index.find(r=>r[0]===id);
+ for(const area of areas)assert(row[6].includes(area),`V5 ${id}: ${area} ausente`);
+ if(visible)assert.equal(row[7],true);
+}
+for(const id of recovered.thyroidV5)assert(index.find(r=>r[0]===id)[6].includes('tireoide'));
+console.log('PASS: todos os vínculos recuperados da V5 presentes no catálogo publicado');
