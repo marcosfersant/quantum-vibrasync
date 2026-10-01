@@ -54,6 +54,15 @@ for(const row of index){
  const p={n:original[1],pt:row[1],base:row[1],_qvFonteTecnica:/\bDNAE\b/i.test(original[2])||/^DNA_/i.test(original[8])||/^(RRMD|MWE)$/i.test(original[2])||/MW_Frequencies/i.test(original[8])};
  p.finalidade=qvFinalidadeClinica(p);
  row[7]=qvProgramaTemFinalidadePublica(p);
+ // Thyroid membership is additive: retain reviewed organ and hormone folders.
+ // Do not mistake fungal Parathyridaria names or thoracic vertebrae T3/T4 for thyroid.
+ const thyroid=/thyroid|tireoid|thyroxin|tiroxin|triiodothy|triiodotir|liothyron|thyrotrop|tireotrop|\bgraves\b|\bbasedow\b|hashimoto|\bgoit(?:er|re)\b|\bbocio\b|\bcretinism|\bcretinismo|\bmyxedema\b|\bmixedema\b/.test(normalizarNomeBanco(p.n+' '+p.pt));
+ if(thyroid){
+  row[6]=[...new Set([...(row[6]||[]),'tireoide'])];
+  row[7]=true;
+  if(/thyroxin|tiroxin|triiodothy|triiodotir|liothyron|thyrotrop|tireotrop|hormon|\btsh\b/.test(normalizarNomeBanco(p.n+' '+p.pt)))row[6]=[...new Set([...row[6],'hormonal'])];
+ }
+
 }
 fs.writeFileSync('dist/data/indice.json',JSON.stringify(index));
 console.log('Classificação de saída:',index.reduce((a,r)=>(a[r[4]]=(a[r[4]]||0)+1,a),{}));
