@@ -1,0 +1,23 @@
+name: Gerar V11 teste motor V3
+on:
+  push:
+    paths:
+      - 'tools/gerar_v11_motor_v3.py'
+      - '.github/workflows/gerar-v11-motor-v3.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  gerar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/gerar_v11_motor_v3.py
+      - run: |
+          test -s quantum_vibrasync_v11_teste_motor_v3.html
+          git config user.name "VibraSync Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add quantum_vibrasync_v11_teste_motor_v3.html
+          git diff --cached --quiet && exit 0
+          git commit -m "V11 teste: restaurar busca leve inspirada na V3"
+          git push
