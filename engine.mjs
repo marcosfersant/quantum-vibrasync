@@ -1,4 +1,7 @@
 // Syntax reference: official Spooky2 User's Guide 2025-01-24, pp.73–74,142.
+// Operational output policy, not a universal hearing threshold. Zero is a programmed rest.
+export function requiresBox(hz,endHz=hz){return !(hz===0&&endHz===0)&&(Math.min(hz,endHz)<=20||Math.max(hz,endHz)>=18000)}
+export const BOX_MESSAGE='Requer Box gerador de frequências — não conectado. Faixa reservada ao Box: até 20 Hz e a partir de 18.000 Hz. Sequência original preservada.';
 export const waveMap={1:'sine',2:'square',3:'sawtooth',5:'triangle'};
 const NUMBER='(?:\\d+(?:\\.\\d*)?|\\.\\d+)';
 const TARGET=new RegExp(`^(\\[[^\\]]+\\]|(?:BLR|BCR|BLm|BCm|BL|BC|B|M|L)?${NUMBER})(?:-(${NUMBER}))?`);
@@ -26,7 +29,7 @@ export function compile(row){
  for(const p of parsed){
   for(const d of p.directives){if(d.command==='W'&&waveMap[d.value])wave=waveMap[d.value];else reasons.push({code:'hardware',text:`Diretiva ${d.command}${d.value} exige saída ou configuração de hardware compatível.`})}
   if(p.prefix!=='Hz'){reasons.push({code:'conversion',text:`${labels[p.prefix]||p.prefix}: conversão ainda não validada com os fatores do Spooky2.`});continue}
-  if(Math.max(p.value,p.end)>=20000)reasons.push({code:'external',text:'Gerador acima de 20.000 Hz não conectado. O programa contém valores de 20.000 Hz ou superiores.'});
+  if(requiresBox(p.value,p.end))reasons.push({code:'external',text:BOX_MESSAGE});
   steps.push({hz:p.value,endHz:p.end,seconds:p.seconds,wave,rest:p.value===0&&p.end===0});
  }
  reasons=reasons.filter((v,i,a)=>a.findIndex(x=>x.text===v.text)===i);
@@ -38,6 +41,7 @@ export class Player{
  load(plan){this.stop();this.plan=plan;this.report()}
  duration(){return this.plan.steps.reduce((a,s)=>a+s.seconds*this.scale,0)}
  async play(){if(!this.plan||this.plan.error||this.state==='playing'||this.state==='starting')return;const token=++this.token;this.state='starting';this.report();try{
+ if(this.plan.steps.some(s=>requiresBox(s.hz,s.endHz??s.hz)))throw Error(BOX_MESSAGE);
  const ctx=this.contextFactory();this.ctx=ctx;await ctx.resume();if(token!==this.token)return;
  if(this.plan.steps.some(s=>Math.max(s.hz,s.endHz??s.hz)>=ctx.sampleRate/2))throw Error('Frequência fora da capacidade desta saída de áudio.');
  this.gain=ctx.createGain();this.noiseGain=ctx.createGain();this.noiseGate=ctx.createGain();this.gain.connect(ctx.destination);this.noiseGain.connect(this.noiseGate);this.noiseGate.connect(ctx.destination);this.gain.gain.value=0;this.noiseGain.gain.value=0;this.noiseGate.gain.value=0;
