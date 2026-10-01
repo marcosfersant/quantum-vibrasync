@@ -1,0 +1,42 @@
+{
+  "voz": {
+    "v6": 43,
+    "v7": 43
+  },
+  "voice": {
+    "v6": 7,
+    "v7": 7
+  },
+  "MediaRecorder": {
+    "v6": 0,
+    "v7": 0
+  },
+  "getUserMedia": {
+    "v6": 3,
+    "v7": 3
+  },
+  "tpInicializar": {
+    "v6": 4,
+    "v7": 4
+  },
+  "qvPesquisarProblema": {
+    "v6": 5,
+    "v7": 5
+  },
+  "qvPrepararBancoEmSegundoPlano": {
+    "v6": 3,
+    "v7": 3
+  },
+  "qvCarregarBancoRapidoEmBlocos": {
+    "v6": 3,
+    "v7": 3
+  },
+  "VIBRASYNC_DB": {
+    "v6": 26,
+    "v7": 26
+  },
+  "indexedDB": {
+    "v6": 2,
+    "v7": 2
+  }
+}

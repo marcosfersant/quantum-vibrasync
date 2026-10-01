@@ -1,0 +1,131 @@
+--- V6
+
++++ V7
+
+@@ -1337,9 +1337,9 @@
+
+     </div>
+     <div class="pnl" style="margin-bottom:12px;">
+       <div class="ph"><span class="dot"></span>Banco de Protocolos JSON</div>
+       <div class="pb">
+-        <div style="font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:8px;">Banco Spooky completo incorporado: 90.893 programas. Também aceita JSON simples ou o formato compacto com schema_programa. Comandos são preservados; frequências numéricas abaixo de 20.000 Hz tocam automaticamente. A partir de 20.000 Hz, aparece a indicação de aparelho externo.</div>
++        <div style="font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:8px;">Banco Spooky completo incorporado: 90.893 programas. Também aceita JSON simples ou o formato compacto com schema_programa. Comandos são preservados; sinais abaixo de 20.000 Hz tocam automaticamente. A partir de 20.000 Hz, o programa indica a necessidade do Quantum VibraSync Box.</div>
+         <select class="fi" id="dbImportMode" style="margin-bottom:7px;">
+           <option value="merge">Mesclar e remover duplicados</option>
+           <option value="replace">Substituir todo o banco atual</option>
+           <option value="replace-peptides">Remover peptídeos e depois mesclar</option>
+@@ -5514,10 +5514,10 @@
+
+ }
+ function qvNoLimite(p){
+   return (p.f||[]).some(function(f){f=Number(f);return f>=18000&&f<20000;});
+ }
+-function qvOndaNome(w){return Number(w)===2?'Quadrada':Number(w)===5?'Triangular':'Senoidal';}
+-function qvOndaAudio(w){return Number(w)===2?'square':Number(w)===5?'triangle':'sine';}
++function qvOndaNome(w){w=Number(w);return w===2?'Quadrada':w===5?'Triangular':(w===3||w===4)?'Serra':'Senoidal';}
++function qvOndaAudio(w){w=Number(w);return w===2?'square':w===5?'triangle':(w===3||w===4)?'sawtooth':'sine';}
+ function qvTempo(min){
+   min=Math.max(0,Number(min)||0);
+   if(min<1)return Math.round(min*60)+' s';
+   if(min<60)return Number(min.toFixed(1))+' min';
+@@ -11223,8 +11223,25 @@
+
+   if(/^(?:H5N1\s*[-–]?\s*)?Gripe aviária\b|^Gripe aviária\b|^Vírus da gripe aviária\b/i.test(s))return 'Gripe aviária';
+   if(/^Candida Albicans\b/i.test(s))return 'Candida Albicans';
+   return s||String(nome||'Programa sem nome');
+ }
++function qvNomePacote(base,indice,total,p){
++  base=String(base||p&&p.pt||p&&p.n||'Programa').trim();
++  if(total<=1)return base;
++  var original=String(p&&p.pt||p&&p.n||'').trim();
++  // Se o próprio registro traz uma variante clínica descritiva, preserve-a.
++  var limpa=qvNomeBase(original);
++  if(limpa&&normalizarNomeBanco(limpa)!==normalizarNomeBanco(base)&&!/^(programa|sequencia|pacote)\b/i.test(limpa))return base+' — '+limpa;
++  var rotulos=['Programa Principal','Programa Complementar','Sequência Complementar','Programa de Apoio','Sequência de Apoio','Programa Associado','Sequência Associada','Programa Adicional'];
++  return base+' — '+(rotulos[indice]||('Programa Complementar '+(indice)));
++}
++function qvWaveEscolhida(p){return Number(p&&p.waveManual)||Number(p&&p.wave)||1;}
++function qvDefinirOndaManual(valor){
++  if(!_tpSel)return;
++  _tpSel.waveManual=Number(valor)||0;
++  var nome=qvOndaNome(qvWaveEscolhida(_tpSel));
++  var tipo=document.getElementById('tpDTipo');if(tipo)tipo.textContent=nome+(_tpSel.waveManual?' · seleção manual':' · seleção automática');
++}
+ var QV_CATEGORIAS={
+   todos:'Todos os tratamentos',fungos:'Fungos e micoses',parasitas:'Parasitas e vermes',virus:'Vírus e gripes',bacterias:'Infecções bacterianas',cancer:'Câncer e tumores',
+   metabolico:'Diabetes e metabólico',cardio:'Cardiovascular',neuro:'Neurológico',dor:'Dor e articulações',digestivo:'Estômago e intestino',renal:'Rins e urinário',
+   hepatico:'Fígado e vesícula',pancreas:'Pâncreas',respiratorio:'Respiratório',pele:'Pele',endocrino:'Hormonal e endócrino',imune:'Imunidade e alergias',
+@@ -12337,9 +12354,9 @@
+
+   if(elBtn)elBtn.classList.add('on');
+   var rel=[];g.programas.forEach(function(p){(p.associacoes||[]).forEach(function(a){if(rel.indexOf(a)<0)rel.push(a);});});
+   document.getElementById('qvGroupTitle').textContent=g.nome;document.getElementById('qvGroupSub').textContent=g.programas.length+' programa'+(g.programas.length!==1?'s':'')+' '+(g.programas.length!==1?'disponíveis':'disponível')+'. Relacionado a: '+rel.slice(0,6).join(' · ')+'.';
+   document.getElementById('qvProgramChoices').innerHTML=g.programas.map(function(p,i){
+-    p.nomeExibicao=g.nome+(g.programas.length>1?' '+(i+1):'');
++    p.nomeExibicao=qvNomePacote(g.nome,i,g.programas.length,p);
+     var variante=p.pt!==g.nome?p.pt:'';
+     return '<button class="qv-program-choice" onclick="tpSelecionarPrograma('+i+',this)"><div><strong>'+escHTML(p.nomeExibicao)+'</strong>'+(variante?'<small>'+escHTML(variante)+'</small>':'')+'</div><span>'+qvTempo(qvDuracaoOriginalSegundos(p)/60)+(qvPrecisaBox(p)?' · Box':'')+'</span></button>';
+   }).join('');
+   document.getElementById('qvGroupPanel').classList.add('show');document.getElementById('tpDetail').classList.remove('show');
+@@ -12349,16 +12366,16 @@
+
+ function tpSelecionarPrograma(idx,elBtn){
+   if(!_qvGrupoAberto||!_qvGrupoAberto.programas[idx])return;
+   var p=qvPrepararProgramaDetalhado(_qvGrupoAberto.programas[idx]);_tpSel=p;_tpFreqSel=(p.f||[])[0]||null;
+   document.querySelectorAll('.qv-program-choice').forEach(function(e){e.classList.remove('on');});if(elBtn)elBtn.classList.add('on');
+-  p.nomeExibicao=p.nomeExibicao||((_qvGrupoAberto.nome||p.base||p.pt)+(_qvGrupoAberto.programas.length>1?' '+(idx+1):''));
++  p.nomeExibicao=p.nomeExibicao||qvNomePacote((_qvGrupoAberto.nome||p.base||p.pt),idx,_qvGrupoAberto.programas.length,p);
+   document.getElementById('tpDNome').textContent=p.nomeExibicao+(p.pt!==_qvGrupoAberto.nome?' · '+p.pt:'')+(p.peptideo?' · Peptídeo':'');
+   document.getElementById('tpDQtd').textContent=(p.f.length||1)+' etapa'+((p.f.length||1)!==1?'s':'');
+   var originalMin=qvDuracaoOriginalSegundos(p)/60;
+   document.getElementById('tpDTempo').textContent=qvTempo(originalMin)+' · padrão original do pacote';
+   if(!(Number(p.durEscolhida)>0))p.durEscolhida=originalMin;
+   var tempoEscolhido=document.getElementById('qvTempoEscolhido');tempoEscolhido.max=Math.ceil(originalMin);tempoEscolhido.value=Math.min(Math.ceil(originalMin),Math.round(Number(p.durEscolhida)||originalMin));
+-  document.getElementById('tpDTipo').textContent=qvOndaNome(p.wave)+' · seleção automática';
++  document.getElementById('tpDTipo').innerHTML=qvOndaNome(qvWaveEscolhida(p))+' · '+(p.waveManual?'seleção manual':'seleção automática')+' <select class="qv-time-choice" style="margin-left:8px;width:132px" onchange="qvDefinirOndaManual(this.value)"><option value="0" '+(!p.waveManual?'selected':'')+'>Original automática</option><option value="1" '+(p.waveManual===1?'selected':'')+'>Senoidal</option><option value="2" '+(p.waveManual===2?'selected':'')+'>Quadrada</option><option value="5" '+(p.waveManual===5?'selected':'')+'>Triangular</option><option value="3" '+(p.waveManual===3?'selected':'')+'>Serra</option></select>';
+   document.getElementById('tpDIdentificacao').textContent=p.identificacao||'Programa do banco de frequências';
+   document.getElementById('tpDRelacionados').textContent=(p.associacoes||[]).join(' · ')||'Índice completo A–Z';
+   var grid=document.getElementById('tpDFreqs');
+   if(grid)grid.innerHTML=(p.f||[]).map(function(_,i){return '<span class="tp-d-chip freq">Etapa '+(i+1)+'</span>';}).join('');
+@@ -12391,9 +12408,9 @@
+
+   var box=document.getElementById('qvQueue'),items=document.getElementById('qvQueueItems'),total=document.getElementById('qvQueueTotal');
+   box.classList.toggle('show',_qvQueue.length>0);
+   var mins=_qvQueue.reduce(function(s,p){return s+qvDuracaoExecucaoSegundos(p)/60;},0);
+   total.textContent=_qvQueue.length+' programa'+(_qvQueue.length!==1?'s':'')+' · '+qvTempo(mins);
+-  items.innerHTML=_qvQueue.map(function(p,i){return '<div class="qv-queue-item"><span class="qv-queue-num">'+(i+1)+'</span><div><div>'+escHTML(p.nomeExibicao||p.pt||p.n)+(p.peptideo?' · Peptídeo':'')+'</div><div class="qv-queue-meta">'+qvTempo(qvDuracaoExecucaoSegundos(p)/60)+' · '+qvOndaNome(p.wave)+(qvPrecisaBox(p)?' · Requer Box':'')+'</div></div><span class="tp-badge s">Programa '+(i+1)+'</span><button class="qv-queue-remove" onclick="qvRemoverFila('+i+')">×</button></div>';}).join('');
++  items.innerHTML=_qvQueue.map(function(p,i){return '<div class="qv-queue-item"><span class="qv-queue-num">'+(i+1)+'</span><div><div>'+escHTML(p.nomeExibicao||p.pt||p.n)+(p.peptideo?' · Peptídeo':'')+'</div><div class="qv-queue-meta">'+qvTempo(qvDuracaoExecucaoSegundos(p)/60)+' · '+qvOndaNome(qvWaveEscolhida(p))+(qvPrecisaBox(p)?' · Requer Box':'')+'</div></div><span class="tp-badge s">Programa '+(i+1)+'</span><button class="qv-queue-remove" onclick="qvRemoverFila('+i+')">×</button></div>';}).join('');
+ }
+ function tpIniciarSelecionado(){if(!_tpSel){showToast('Selecione um programa');return;}qvIniciar([_tpSel]);}
+ function tpIniciarSessao(){if(!_qvQueue.length){showToast('Adicione programas à sessão');return;}qvIniciar(_qvQueue.slice());}
+ 
+@@ -12412,10 +12429,10 @@
+
+   var p=qvProgramaAtual();if(!p){qvConcluirSessao();return;}
+   _qvStageIndex=0;_qvProgramTotalSeconds=qvDuracaoExecucaoSegundos(p);_qvProgramElapsedSeconds=0;_qvRemaining=_qvProgramTotalSeconds;
+   document.getElementById('qvRunTitle').textContent=(p.nomeExibicao||p.pt||p.n)+(p.peptideo?' · Peptídeo':'');
+   document.getElementById('qvRunProgramPos').textContent='Programa '+(_qvProgramIndex+1)+' de '+_qvPrograms.length;
+-  document.getElementById('qvRunMode').textContent=qvOndaNome(p.wave)+' · volumes independentes';
+-  document.getElementById('qvRunOutput').textContent='Saída: '+(_tpSaida==='p2'?'dispositivo':_tpSaida);
++  document.getElementById('qvRunMode').textContent=qvOndaNome(qvWaveEscolhida(p))+' · volumes independentes';
++  document.getElementById('qvRunOutput').textContent=qvPrecisaBox(p)?'Quantum VibraSync Box · necessário':'Saída: '+(_tpSaida==='p2'?'computador / tablet / celular':_tpSaida);
+   qvIniciarEtapa();
+ }
+ function qvIniciarEtapa(){
+   var p=qvProgramaAtual(),fs=p&&p.f||[];
+@@ -12429,12 +12446,12 @@
+
+   qvTocarEtapa(Number(fs[_qvStageIndex]),p);qvAtualizarTela();qvIniciarRelogio();
+ }
+ function qvTocarEtapa(freq,p){
+   qvPararSom();
+-  if(freq>=20000){enviarHardware({cmd:'output',mode:_tpSaida,frequency:freq,wave:qvOndaAudio(p.wave),intensity:'program',frequencyVolume:Math.round(_qvFreqVolume*100),whiteNoiseVolume:Math.round(_qvNoiseVolume*100)});return;}
++  if(freq>=20000){enviarHardware({cmd:'output',mode:_tpSaida,frequency:freq,wave:qvOndaAudio(qvWaveEscolhida(p)),intensity:'program',frequencyVolume:Math.round(_qvFreqVolume*100),whiteNoiseVolume:Math.round(_qvNoiseVolume*100)});return;}
+   try{
+     _qvAudio=new(window.AudioContext||window.webkitAudioContext)();_qvOsc=_qvAudio.createOscillator();_qvGain=_qvAudio.createGain();
+-    _qvOsc.type=qvOndaAudio(p.wave);_qvOsc.frequency.setValueAtTime(freq,_qvAudio.currentTime);
++    _qvOsc.type=qvOndaAudio(qvWaveEscolhida(p));_qvOsc.frequency.setValueAtTime(freq,_qvAudio.currentTime);
+     _qvGain.gain.setValueAtTime(qvFreqGainValue(),_qvAudio.currentTime);
+     _qvOsc.connect(_qvGain);_qvGain.connect(_qvAudio.destination);_qvOsc.start();
+     var noiseBuffer=_qvAudio.createBuffer(1,_qvAudio.sampleRate*2,_qvAudio.sampleRate),noiseData=noiseBuffer.getChannelData(0);
+     for(var i=0;i<noiseData.length;i++)noiseData[i]=Math.random()*2-1;
