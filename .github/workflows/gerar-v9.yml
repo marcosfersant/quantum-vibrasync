@@ -1,0 +1,33 @@
+name: Gerar VibraSync V9 otimizada
+
+on:
+  push:
+    paths:
+      - 'quantum_vibrasync_v8_90893.html'
+      - 'tools/gerar_v9.py'
+      - '.github/workflows/gerar-v9.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gerar-v9:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gerar V9
+        run: python tools/gerar_v9.py
+      - name: Validar arquivos
+        run: |
+          test -s quantum_vibrasync_v9_90893.html
+          test -s assets/vibrasync-v9-app.js
+          grep -q 'vibrasync-v9-app.js' quantum_vibrasync_v9_90893.html
+      - name: Publicar V9 no repositório
+        run: |
+          git config user.name "VibraSync Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add quantum_vibrasync_v9_90893.html assets/vibrasync-v9-app.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Gerar Quantum VibraSync V9 otimizada"
+          git push
