@@ -1,0 +1,25 @@
+name: Comparar V7 e V8
+
+on:
+  push:
+    paths:
+      - 'tools/comparar_v7_v8.py'
+      - '.github/workflows/comparar-v7-v8.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  comparar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/comparar_v7_v8.py
+      - run: |
+          git config user.name "VibraSync Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/diff_v7_v8_sem_banco.txt docs/resumo_v7_v8.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Diagnosticar regressão V7 para V8"
+          git push
