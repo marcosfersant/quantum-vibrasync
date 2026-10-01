@@ -1,0 +1,26 @@
+name: Gerar V10 teste base V7
+
+on:
+  push:
+    paths:
+      - 'tools/gerar_v10_teste.py'
+      - '.github/workflows/gerar-v10-teste.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gerar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/gerar_v10_teste.py
+      - run: |
+          test -s quantum_vibrasync_v10_teste_v7_90893.html
+          git config user.name "VibraSync Builder"
+          git config user.email "actions@users.noreply.github.com"
+          git add quantum_vibrasync_v10_teste_v7_90893.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Criar V10 teste baseada na V7 sem cache da V8"
+          git push
