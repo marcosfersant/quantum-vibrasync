@@ -1,0 +1,24 @@
+{
+  "programas": 90893,
+  "comandos_classificados": 90893,
+  "reproduziveis": 6179,
+  "bloqueados": 84714,
+  "motivos": {
+    "conversion": 68574,
+    "external": 16139,
+    "hardware": 1
+  },
+  "testes_motor": "passou",
+  "integridade_sha256": "passou",
+  "navegador": "Chromium 153",
+  "teste_build_dist": "passou",
+  "javascript_erros": 0,
+  "desktop": "1440x1000",
+  "mobile": "390x844",
+  "implantado": false,
+  "etapa": 3,
+  "testes_traducoes": "passou",
+  "teste_busca_nome_original_e_portugues": "passou",
+  "teste_cancer_tireoide_duas_areas": "passou",
+  "motor_identico_etapa2": true
+}

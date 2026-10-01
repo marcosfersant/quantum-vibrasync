@@ -1,0 +1,2 @@
+import fs from 'node:fs';import {compile} from '../engine.mjs';
+const index=JSON.parse(fs.readFileSync('data/indice.json'));const status=new Map();for(const file of fs.readdirSync('data').filter(x=>x.startsWith('parte-'))){for(const r of JSON.parse(fs.readFileSync('data/'+file)))status.set(r[0],compile(r).code)}for(const row of index)row[4]=status.get(row[0]);fs.writeFileSync('data/indice.json',JSON.stringify(index));

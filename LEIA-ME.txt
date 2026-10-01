@@ -1,0 +1,54 @@
+QUANTUM VIBRASYNC — RECONSTRUÇÃO LIMPA — ETAPA 3
+Status: pacote de desenvolvimento. Não implantado.
+
+RECUPERAÇÃO DE TRADUÇÕES
+Dados recuperados de V7/V8 das continuações históricas, somente para nomes e organização. Nenhum motor dessas versões foi incorporado.
+3.333 entradas exatas e 848 revisões sistêmicas recuperadas.
+17.487 nomes de exibição diferentes do original após aplicação das tabelas/regras históricas.
+73.406 nomes permanecem iguais ao original; incluem referências científicas/técnicas. A recuperação não equivale a afirmar que todo o banco está integralmente traduzido.
+43 áreas de organização com busca em português e pelo nome original.
+284 nomes tiveram acentuação ou revisão restaurada.
+Tireoide/paratireoide mantidas na área Tireoide; tumores/cânceres também na área Câncer e tumores, conforme revisão do usuário.
+IDs, comandos, frequências e tempos preservados; índice em português separado dos dados de execução.
+Detalhes, dicionários e mapeamento por ID em recuperacao-traducoes/.
+
+Estrutura mantida: GitHub para código, AWS Amplify para hospedagem; integração OpenAI futura no backend, sem chave secreta no navegador.
+
+RECURSOS DO MOTOR DA ETAPA 2, MANTIDOS
+- Intérprete reconhece a sintaxe dos 90.893 programas do banco.
+- Tempos individuais (=segundos), varreduras ascendentes/descendentes e ondas W1/W2/W3/W5.
+- Ordem e repetições preservadas a partir do comando original.
+- Passo 0 Hz funciona como intervalo de silêncio no motor VibraSync.
+- Reprodução agendada no relógio de áudio, com pausa e retomada do ponto correto.
+- 6.179 programas compatíveis com áudio, 155 a mais que na etapa 1.
+- Filtro por compatibilidade e identificação dos motivos de bloqueio.
+- Banco separado em 91 partes, busca em Worker e cache limitado.
+- Configuração amplify.yml para build estático em dist/.
+- Telas inicial e de programas conferidas em Chromium, desktop e celular.
+
+LIMITES
+Reconhecer a sintaxe não significa converter todos os comandos em Hz.
+68.574 programas exigem conversões Spooky2 ainda não validadas.
+16.139 programas têm frequências de 20.000 Hz ou superiores.
+1 programa exige diretivas de hardware.
+Nenhum programa bloqueado é reproduzido parcialmente. Nenhuma frequência é reduzida automaticamente por oitavas.
+Não há driver de aparelho externo nem integração OpenAI ativa nesta etapa.
+Voz, vídeo, foto, bioimpedância, importação e histórico continuam pendentes.
+O JSON adicional chamado spooky2_todos_bancos_modo_compativel.json foi consultado, mas falhou na leitura por estar truncado. Não foi utilizado para preencher conversões.
+
+BASE E INTEGRIDADE
+Base visual: V3 de 23/08/2026. Arquivo original guardado em original/.
+Código de execução reconstruído, sem uso das versões V5–V11.
+90.893 registros do JSON normalizado preservados campo por campo, inclusive IDs, comandos e tempos. O índice de busca é derivado e possui classificação de compatibilidade.
+303.894 componentes é a contagem informada na fonte, não uma contagem independente deste pacote.
+
+TESTES
+node tests/verify.mjs — sintaxe do banco, sequências, tempos, varreduras, ondas persistentes, silêncio, bloqueios, pausa/retomada, conclusão, repetição e cancelamento durante abertura de áudio.
+node scripts/build.mjs — preparar dist/ para hospedagem.
+Teste de navegador: tests/browser-test.cjs, requer Playwright/Chromium; usa BROWSER_EXECUTABLE quando informado.
+
+USO
+Não abrir index.html por file://: o carregamento segmentado requer HTTP/HTTPS.
+Desenvolvimento: python -m http.server 8765; acessar http://localhost:8765.
+O conteúdo desta pasta deve ficar na raiz do repositório que for confirmado para a reconstrução. Antes de alterar o repositório publicado, conferir a branch ligada ao Amplify para evitar substituir a aplicação atual com módulos ainda pendentes.
+Nenhum upload para GitHub ou implantação AWS foi realizado nesta etapa.

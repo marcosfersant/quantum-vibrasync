@@ -1,0 +1,27 @@
+{
+  "fontes": [
+    "quantum_vibrasync_v7_90893.html",
+    "quantum_vibrasync_v8_90893.html"
+  ],
+  "tabelas_v7_v8_identicas": true,
+  "traducoes_exatas": 3333,
+  "revisoes_sistemicas": 848,
+  "areas": 43,
+  "registros": 90893,
+  "nomes_exibidos_diferentes_do_original": 17487,
+  "nomes_originais_mantidos": 73406,
+  "nomes_com_acentuacao_ou_revisao_restaurada": 284,
+  "por_proveniencia": {
+    "regras_historicas": 14123,
+    "nome_original": 73388,
+    "dicionario_exato": 3382
+  },
+  "motor_alterado": false,
+  "dados_de_execucao_alterados": false,
+  "nota": "Recuperação de dados históricos, sem atestar revisão humana de todas as regras genéricas. Nomes técnicos originais e traduções parciais históricas podem permanecer.",
+  "correcao_usuario_tireoide": "Todos os itens de tireoide/paratireoide conservam referência em Tireoide; câncer/tumor/adenoma também em Câncer e tumores.",
+  "sha256_fontes": {
+    "quantum_vibrasync_v8_90893.html": "5dfbb8a45092a6b151e485ef704c1a8b0a93c531821eeb4f48786fe06d283c9f",
+    "quantum_vibrasync_v7_90893.html": "42f162636dca41ef6c36035caa2f9d007071e8c35d5464ac84c04966849aeb20"
+  }
+}
