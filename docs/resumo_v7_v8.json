@@ -1,0 +1,46 @@
+{
+  "voz": {
+    "v7": 43,
+    "v8": 43
+  },
+  "voice": {
+    "v7": 7,
+    "v8": 7
+  },
+  "getUserMedia": {
+    "v7": 3,
+    "v8": 3
+  },
+  "tpInicializar": {
+    "v7": 4,
+    "v8": 4
+  },
+  "qvPesquisarProblema": {
+    "v7": 5,
+    "v8": 5
+  },
+  "qvPrepararBancoEmSegundoPlano": {
+    "v7": 3,
+    "v8": 3
+  },
+  "qvCarregarBancoRapidoEmBlocos": {
+    "v7": 3,
+    "v8": 3
+  },
+  "indexedDB": {
+    "v7": 2,
+    "v8": 2
+  },
+  "qvIniciar": {
+    "v7": 14,
+    "v8": 14
+  },
+  "cmd": {
+    "v7": 32,
+    "v8": 32
+  },
+  "wave": {
+    "v7": 85,
+    "v8": 85
+  }
+}

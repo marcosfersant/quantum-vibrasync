@@ -1,0 +1,77 @@
+--- V7
+
++++ V8
+
+@@ -1,11 +1,11 @@
+
+ <!DOCTYPE html>
+ <html lang="pt-BR">
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Quantum VibraSync</title>
++<title>Quantum VibraSync V8</title>
+ <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+ <style>
+ *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+ :root{
+   --bg:#020b14;--bg2:#041020;--panel:#061828;--panel2:#0a2035;
+@@ -1786,10 +1786,13 @@
+
+   req.onupgradeneeded=function(){var db=req.result;if(!db.objectStoreNames.contains(QVS_DB_STORE))db.createObjectStore(QVS_DB_STORE);};
+   req.onsuccess=function(){resolve(req.result);};req.onerror=function(){reject(req.error);};
+ });}
+ async function salvarBancoGrande(lista){var db=await abrirBancoIDB();return new Promise(function(resolve,reject){var tx=db.transaction(QVS_DB_STORE,'readwrite');tx.objectStore(QVS_DB_STORE).put(lista,'ativo');tx.oncomplete=function(){resolve(true);};tx.onerror=function(){reject(tx.error);};});}
+ async function carregarBancoGrande(){try{var db=await abrirBancoIDB();var lista=await new Promise(function(resolve,reject){var r=db.transaction(QVS_DB_STORE,'readonly').objectStore(QVS_DB_STORE).get('ativo');r.onsuccess=function(){resolve(r.result);};r.onerror=function(){reject(r.error);};});if(Array.isArray(lista)&&lista.length){VIBRASYNC_DB=lista;_tpDados=null;_freqIndexFlat=null;_dbExactIndex=null;atualizarStatusBanco();}}catch(e){console.warn('Banco externo indisponível',e);}}
++var QV_CATALOGO_CACHE_KEY='catalogo-preparado-v8-90893';
++async function qvSalvarCatalogoCache(lista){try{var db=await abrirBancoIDB();return await new Promise(function(resolve,reject){var tx=db.transaction(QVS_DB_STORE,'readwrite');tx.objectStore(QVS_DB_STORE).put(lista,QV_CATALOGO_CACHE_KEY);tx.oncomplete=function(){resolve(true);};tx.onerror=function(){reject(tx.error);};});}catch(e){return false;}}
++async function qvCarregarCatalogoCache(){try{var db=await abrirBancoIDB();return await new Promise(function(resolve,reject){var r=db.transaction(QVS_DB_STORE,'readonly').objectStore(QVS_DB_STORE).get(QV_CATALOGO_CACHE_KEY);r.onsuccess=function(){resolve(r.result);};r.onerror=function(){reject(r.error);};});}catch(e){return null;}}
+ function normalizarNomeBanco(s){return cleanText(s,300).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+ function frequenciasDiretasComando(cmd){
+   var out=[];
+   String(cmd||'').split(',').forEach(function(raw){
+     var m=raw.trim().match(/^(-?(?:\d+(?:\.\d*)?|\.\d+))(?:\s*-\s*(-?(?:\d+(?:\.\d*)?|\.\d+)))?(?:\s*=\s*\d+(?:\.\d+)?)?(?:\s+[A-Za-z][^\s,]*)*$/);
+@@ -12195,10 +12198,11 @@
+
+   if(_qvPreparacaoIndice<_tpDados.length){
+     if(_qvNavNivel==='areas'&&_qvPreparacaoIndice%5000<processados){var c=document.getElementById('tpCount');if(c)c.textContent='Catálogo aberto · organizando '+Math.round(_qvPreparacaoIndice/_tpDados.length*100)+'% do banco em segundo plano';}
+     _qvPreparacaoTimer=setTimeout(qvPrepararBancoEmSegundoPlano,0);
+   }else{
+     _qvPreparacaoTimer=null;qvAtualizarContagens();
++    qvSalvarCatalogoCache(_tpDados);
+     if(_qvNavNivel==='areas')qvMostrarAreas();
+     else if(_qvNavNivel==='area'&&_qvAreaAtual)qvAbrirArea(_qvAreaAtual);
+     else if(_qvNavNivel==='letra'&&_qvLetraAtual)qvAbrirLetra(_qvLetraAtual);
+     else if(_qvNavNivel==='busca'){var campo=document.getElementById('tpSearch');if(campo&&campo.value)qvPesquisarProblema(campo.value);}
+   }
+@@ -12318,16 +12322,24 @@
+
+   if(_qvNavNivel==='letra'){qvMostrarIndiceAZ();return;}
+   if(_qvNavNivel==='busca'){var campo=document.getElementById('tpSearch');if(campo)campo.value='';}
+   qvMostrarAreas();document.getElementById('qvLibraryBrowser').scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ 
+-tpInicializar = function(){
++tpInicializar = async function(){
+   if(_tpInited)return;
+-  // O banco é aberto em pequenos blocos: a interface aparece imediatamente
+-  // e continua respondendo mesmo em computadores e celulares mais lentos.
+-  _tpDados=[];_tpInited=true;_qvCarregamentoIndice=0;_qvCarregandoBase=true;
+-  qvMostrarEstruturaCarregando();setTimeout(qvCarregarBancoRapidoEmBlocos,20);
++  _tpInited=true;qvMostrarEstruturaCarregando();
++  var cache=await qvCarregarCatalogoCache();
++  if(Array.isArray(cache)&&cache.length===VIBRASYNC_DB.length){
++    _tpDados=cache;_qvCarregandoBase=false;_qvCarregamentoIndice=VIBRASYNC_DB.length;
++    var campo=document.getElementById('tpSearch');if(campo){campo.disabled=false;campo.placeholder='Digite: rinite, sinusite, coração, Candida, bactéria...';}
++    _qvCategoriaAtual='todos';qvAtualizarContagens();qvMostrarAreas();
++    var ct=document.getElementById('tpCount');if(ct)ct.textContent='Catálogo pronto · '+_tpDados.length.toLocaleString('pt-BR')+' programas';
++    return;
++  }
++  // Primeira abertura neste navegador: prepara em blocos e grava o catálogo pronto.
++  _tpDados=[];_qvCarregamentoIndice=0;_qvCarregandoBase=true;
++  setTimeout(qvCarregarBancoRapidoEmBlocos,20);
+ };
+ 
+ tpBuscar = function(q){
+   qvPesquisarProblema(q);
+ };
