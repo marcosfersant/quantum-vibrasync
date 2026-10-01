@@ -1,0 +1,8 @@
+Referência de sintaxe: Spooky2 User's Guide 2025-01-24, páginas impressas 73–74 e 142.
+https://www.spooky2.com/resources/Spooky2_Users_Guide_20250124.pdf
+Consultado em 01/10/2026.
+Implementados: frequência numérica, repetição em sequência, =tempo, varredura início-fim, W1/W2/W3/W5 persistente.
+Zero em um passo numérico é tratado pelo motor local como silêncio. Esse comportamento foi explicitado como convenção do VibraSync e não validado contra saída física Spooky2.
+Identificados sem conversão: B, BL, BC, BLR, BCR, BLm, BCm, M, L e fórmula entre colchetes. BLR/BCR/BLm/BCm foram identificados no arquivo original; sua semântica e fatores não foram confirmados no manual consultado.
+Diretivas de tensão, gate, offset e demais saídas são reconhecidas como dependentes de hardware; não são reduzidas a controle de volume.
+O manual documenta a sintaxe do software; esta implementação não valida efeitos terapêuticos.

@@ -1,0 +1,18 @@
+{
+  "base": "quantum_vibrasync_v3_base_23-08-2026.html",
+  "sha256_base": "fa8b71d4b4ee6cacedc75d8b5c9698682965e293b2126f1821149b1de19ae626",
+  "programas": 90893,
+  "componentes_informados_na_fonte": 303894,
+  "partes": 91,
+  "versoes_posteriores_utilizadas": false,
+  "escopo": "Recuperação de traduções e áreas históricas sobre o motor da etapa 2; banco original preservado.",
+  "sha256_banco_normalizado": "9e41f4f0361ad010b29ce9372e1413b5541621bc7e9cd7107b107f8c202050c6",
+  "validacao_visual": "Chromium 153: desktop 1440x1000 e mobile 390x844",
+  "implantacao": "não realizada",
+  "etapa": 3,
+  "sha256_registros_json": "c8ace46ff7e307f4c58260bc69f345b7d4e050b8a8aad30eec642b06388260db",
+  "dados_traducao_recuperados_de": [
+    "V7 e V8 (tabelas idênticas)"
+  ],
+  "motor_etapa2_sha256": "68c1a274f592930452c265609695af22d265ddbf367e4216376e3c5fca3c3ada"
+}
