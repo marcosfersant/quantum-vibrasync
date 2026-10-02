@@ -40,3 +40,14 @@ p.load(compile(row('440,25000')));await p.play();assert.equal(p.duration(),1);ct
 assert.equal(compile(row('BL29901')).steps[0].hz,155518226281848000/29900);
 assert.equal(compile(row('M1'),{confirmed:false}).steps[0].hz,2.2523430883e23);
 assert.equal(compile(row('M1'),{frequencyFactor:NaN}).code,'pending');
+
+// Mixed loops use only active dwell times and restart at the first active stage.
+const loop=compile(row('25000=180,700=180,1000=60,40000=180'));
+p.load(loop);p.repeat=true;const at=frequencies.length;await p.play();
+assert.equal(p.repeat,true);assert.equal(p.duration(),240);
+assert.deepEqual(frequencies.slice(at),[700,1000,700,1000]);
+ctx.currentTime=240.04;p.tick();assert.equal(p.state,'playing');assert.equal(p.index,1);assert(p.elapsed<.02);
+assert.deepEqual(frequencies.slice(at),[700,1000,700,1000,700,1000]);
+assert.deepEqual(state.skipped,[1,4]);assert.equal(loop.totalSeconds,600);
+p.pause();assert.equal(p.state,'paused');await p.play();assert.equal(p.repeat,true);p.stop();assert.equal(p.state,'stopped');
+console.log('PASS: mixed-program loop skips highs, preserves 180/60 second dwells and original plan, pause/resume/stop');
