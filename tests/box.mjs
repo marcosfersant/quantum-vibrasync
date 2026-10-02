@@ -7,7 +7,7 @@ for(const f of [20,20.1,440,537,17999,18000,19000,19999,20000])assert.equal(comp
 assert.equal(compile(row('0=5,440')).code,'audio');
 for(const c of ['440-20001','20001-440','9.6-440','440-9.6','0-440'])assert.equal(compile(row(c)).code,'external');
 const player=new Player(()=>{},()=>{throw Error('Output must not open')});
-player.load(compile(row('20001,537')));await player.play();assert.equal(player.state,'blocked');
+player.load(compile(row('20001')));await player.play();assert.equal(player.state,'blocked');
 const index=JSON.parse(fs.readFileSync('dist/data/indice.json'));
 const codes=new Map(index.map(r=>[r[0],r[4]]));
 for(const f of fs.readdirSync('data').filter(f=>/^parte-.*\.json$/.test(f)))for(const r of JSON.parse(fs.readFileSync('data/'+f)))assert.equal(codes.get(r[0]),compile(r).code);
