@@ -32,15 +32,15 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('#areaCards').evaluate(e=>e.hidden),false);
   assert.equal(await page.locator('#list button').count(),0);
   await page.selectOption('#area','indice');
-  for(const [id,label] of [['51210','configuração pendente'],['70582','Requer Box'],['87768','mistos / parciais'],['82693','Requer Box']]){
+  for(const [id,label] of [['51210','Requer Box'],['70582','Requer Box'],['87768','mistos / parciais'],['82693','Requer Box']]){
    const previous=await page.locator('#list').textContent();
    await page.locator('#search').fill(id);await page.waitForFunction(({label,previous})=>{const text=document.querySelector('#list').textContent;return text!==previous&&text.includes(label)},{label,previous});
    await page.locator('#list button').first().click();
    await page.waitForFunction(()=>document.querySelector('#packages .item'));
    await page.locator('#packages .item').first().click();
    await page.waitForFunction(()=>!document.querySelector('#player').hidden);
-   if(id==='51210'){assert.match(await page.locator('#sequence').innerText(),/configuração pendente/i);assert(await page.locator('#play').isDisabled());}
-   if(id==='87768'){assert.match(await page.locator('#sequence').innerText(),/Áudio disponível/);assert.match(await page.locator('#sequence').innerText(),/configuração pendente/i);assert(!await page.locator('#play').isDisabled());}
+   if(id==='51210'){assert.match(await page.locator('#sequence').innerText(),/requer Box/i);assert(await page.locator('#play').isDisabled());}
+   if(id==='87768'){assert.match(await page.locator('#sequence').innerText(),/Áudio disponível/);assert.match(await page.locator('#sequence').innerText(),/requer Box/i);assert(!await page.locator('#play').isDisabled());}
   }
   await page.locator('#search').fill('69270');
   await page.waitForFunction(()=>document.querySelector('#list').textContent.includes('Seios acessórios do nariz'));
