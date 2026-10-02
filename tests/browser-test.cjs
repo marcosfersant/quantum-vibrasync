@@ -31,12 +31,12 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('#areaCards').evaluate(e=>e.hidden),false);
   assert.equal(await page.locator('#list button').count(),0);
   await page.selectOption('#area','indice');
-  for(const [id,label] of [['51210','interpretação pendente'],['70582','Requer Box'],['72747','Requer Box'],['87768','Requer Box'],['82693','Requer Box']]){
+  for(const [id,label] of [['51210','Requer Box'],['70582','Requer Box'],['72747','Requer Box'],['87768','Requer Box'],['82693','Requer Box']]){
    const previous=await page.locator('#list').textContent();
    await page.locator('#search').fill(id);await page.waitForFunction(({label,previous})=>{const text=document.querySelector('#list').textContent;return text!==previous&&text.includes(label)},{label,previous});
-   if(['87768','82693'].includes(id))assert.match(await page.locator('#list').innerText(),/interpretação pendente/);
+   assert.doesNotMatch(await page.locator('#list').innerText(),/interpretação pendente/);
    await page.locator('#list button').first().click();await page.waitForFunction(()=>document.querySelector('#packages .item')?.disabled);
-   if(['87768','82693'].includes(id))assert.match(await page.locator('#packages').innerText(),/Requer Box.*Interpretação pendente/s);
+   assert.doesNotMatch(await page.locator('#packages').innerText(),/Interpretação pendente/);
   }
   await page.locator('[data-view=livre]').first().click();
   for(const hz of ['9.6','20000','25000']){
@@ -59,6 +59,6 @@ const {chromium}=require('playwright');
   await page.setViewportSize({width:390,height:844});assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
   await page.locator('[data-view=programas]').first().click();assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
   assert.deepEqual(errors,[]);
-  console.log('PASS: deferred search, return to areas, lazy load, original sequences, pause/resume, early Box notices, pending commands, free frequency, navigation, mobile, 440 Hz signal without noise');
+  console.log('PASS: deferred search, return to areas, lazy load, original sequences, pause/resume, early Box notices, converted commands requiring Box, free frequency, navigation, mobile, 440 Hz signal without noise');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});
