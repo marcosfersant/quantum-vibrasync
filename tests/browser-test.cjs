@@ -5,6 +5,7 @@ const {chromium}=require('playwright');
  const browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE||undefined,args:['--no-sandbox']});
  try{
   const page=await browser.newPage({viewport:{width:1440,height:1000}});
+  page.setDefaultTimeout(20000);
   const errors=[],requests=[];
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
   await page.goto(process.env.TEST_URL||'http://127.0.0.1:8765');
@@ -31,15 +32,35 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('#areaCards').evaluate(e=>e.hidden),false);
   assert.equal(await page.locator('#list button').count(),0);
   await page.selectOption('#area','indice');
-  for(const [id,label] of [['51210','Requer Box'],['70582','Requer Box'],['72747','Requer Box'],['87768','Requer Box'],['82693','Requer Box']]){
+  for(const [id,label] of [['51210','configuração pendente'],['70582','Requer Box'],['87768','mistos / parciais'],['82693','Requer Box']]){
    const previous=await page.locator('#list').textContent();
    await page.locator('#search').fill(id);await page.waitForFunction(({label,previous})=>{const text=document.querySelector('#list').textContent;return text!==previous&&text.includes(label)},{label,previous});
-   assert.doesNotMatch(await page.locator('#list').innerText(),/interpretação pendente/);
-   await page.locator('#list button').first().click();await page.waitForFunction(()=>document.querySelector('#packages .item')?.disabled);
-   assert.doesNotMatch(await page.locator('#packages').innerText(),/Interpretação pendente/);
+   await page.locator('#list button').first().click();
+   await page.waitForFunction(()=>document.querySelector('#packages .item'));
+   await page.locator('#packages .item').first().click();
+   await page.waitForFunction(()=>!document.querySelector('#player').hidden);
+   if(id==='51210'){assert.match(await page.locator('#sequence').innerText(),/Configuração pendente/);assert(await page.locator('#play').isDisabled());}
+   if(id==='87768'){assert.match(await page.locator('#sequence').innerText(),/Áudio disponível/);assert.match(await page.locator('#sequence').innerText(),/Configuração pendente/);assert(!await page.locator('#play').isDisabled());}
   }
+  await page.locator('#search').fill('69270');
+  await page.waitForFunction(()=>document.querySelector('#list').textContent.includes('Seios acessórios do nariz'));
+  await page.locator('#list button').first().click();
+  await page.waitForFunction(()=>document.querySelector('#packages .item'));
+  await page.locator('#packages .item').first().click();
+  await page.locator('#play').click();
+  await page.waitForFunction(()=>!document.querySelector('#skipStep').hidden);
+  assert.match(await page.locator('#playStatus').innerText(),/Etapa 1 de 4/);
+  page.on('dialog',dialog=>dialog.accept());
+  await page.locator('#skipStep').click();
+  await page.waitForFunction(()=>document.querySelector('#playStatus').textContent.includes('Etapa 2 de 4'));
+  await page.locator('#skipStep').click();
+  await page.waitForFunction(()=>document.querySelector('#playStatus').textContent.includes('Reproduzindo'));
+  assert.match(await page.locator('#playStatus').innerText(),/Etapa 3 de 4/);
+  assert.match(await page.locator('#playStatus').innerText(),/parcial/);
+  assert.equal(await page.locator('#skipStep').isVisible(),false);
+  await page.locator('#stop').click();
   await page.locator('[data-view=livre]').first().click();
-  for(const hz of ['9.6','20000','25000']){
+  for(const hz of ['9.6','20001','25000']){
    await page.locator('#freeHz').fill(hz);await page.locator('#prepareFree').click();
    assert.match(await page.locator('#message').innerText(),/Requer Box/);assert(await page.locator('#player').evaluate(e=>e.hidden));
   }
@@ -59,6 +80,6 @@ const {chromium}=require('playwright');
   await page.setViewportSize({width:390,height:844});assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
   await page.locator('[data-view=programas]').first().click();assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
   assert.deepEqual(errors,[]);
-  console.log('PASS: deferred search, return to areas, lazy load, original sequences, pause/resume, early Box notices, converted commands requiring Box, free frequency, navigation, mobile, 440 Hz signal without noise');
+  console.log('PASS: deferred search, return to areas, lazy load, original sequences, pause/resume, per-stage matrix, pending presets, mixed programs, free frequency, navigation, mobile, 440 Hz signal without noise');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});
