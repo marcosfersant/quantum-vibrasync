@@ -45,11 +45,15 @@ function qvProgramaTemFinalidadePublica(p){
   // isoladas continuam acessíveis no Índice completo A–Z.
   return /disease|doenca|syndrome|sindrome|cancer|tumor|carcinom|sarcom|leucem|leukem|melanom|neoplas|lymphom|linfom|myelom|mieloma|pain|\bdor\b|fever|febre|diabet|hypertens|hipertens|hypotens|hipotens|arrhythm|arritm|arthritis|artrit|infection|infeccao|inflamma|inflama|abscess|abscesso|rhinitis|rinite|sinusitis|sinusite|bronchitis|bronquite|pneumonia|asthma|asma|hepatitis|hepatite|gastritis|gastrite|colitis|colite|cystitis|cistite|dermatitis|dermatite|neuropathy|neuropatia|neuralgia|migraine|enxaqueca|seizure|convuls|paralysis|paralis|insufficiency|insuficiencia|failure|falencia|deficiency|deficiencia|disorder|disturbio|malformation|malformacao|anemia|anaemia|bleeding|sangramento|edema|ulcer|ulcera|wound|ferida|toxic|toxicity|toxico|toxicidade/.test(s);
 }
-const codes=new Map(), originals=new Map();
-for(const f of fs.readdirSync('data').filter(f=>/^parte-.*\.json$/.test(f)))for(const row of JSON.parse(fs.readFileSync('data/'+f))){codes.set(row[0],compile(row).code);originals.set(row[0],row);}
+const codes=new Map(), requirements=new Map(), originals=new Map();
+for(const f of fs.readdirSync('data').filter(f=>/^parte-.*\.json$/.test(f)))for(const row of JSON.parse(fs.readFileSync('data/'+f))){const plan=compile(row);codes.set(row[0],plan.code);requirements.set(row[0],plan.reasons||[]);originals.set(row[0],row);}
 const index=JSON.parse(fs.readFileSync('data/indice.json'));
 for(const row of index){
  row[4]=codes.get(row[0]);
+ // Independent flags retain both hardware and interpretation requirements.
+ const reasons=requirements.get(row[0]);
+ row[8]=reasons.some(r=>r.code==='external');
+ row[9]=reasons.some(r=>r.code!=='external');
  const original=originals.get(row[0]);
  const p={n:original[1],pt:row[1],base:row[1],_qvFonteTecnica:/\bDNAE\b/i.test(original[2])||/^DNA_/i.test(original[8])||/^(RRMD|MWE)$/i.test(original[2])||/MW_Frequencies/i.test(original[8])};
  p.finalidade=qvFinalidadeClinica(p);
