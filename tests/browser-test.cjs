@@ -1,2 +1,64 @@
+// Local build test; requires Playwright. Never changes bank data.
+const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
-(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE||undefined,args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--no-zygote']});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));const requests=[];page.on('request',r=>requests.push(r.url()));await page.goto('http://127.0.0.1:8765');await page.waitForTimeout(200);if(requests.some(s=>s.includes('/data/')))throw Error('Eager database load');await page.getByRole('button',{name:'Programas de Tratamento'}).click();await page.waitForFunction(()=>document.getElementById('count').textContent.includes('90.893'));await page.locator('#execution').selectOption('audio');await page.waitForFunction(()=>document.getElementById('count').textContent.includes('6.179'));await page.locator('#execution').selectOption('');await page.locator('#search').fill('Enlarged Thyroid Gland');await page.waitForFunction(()=>document.querySelectorAll('.item').length===1);await page.locator('.item').click();await page.waitForFunction(()=>document.getElementById('name').textContent==='Bócio (aumento da tireoide)');await page.screenshot({path:'preview-traducao.png'});await page.locator('#search').fill('89137');await page.locator('#area').selectOption('tireoide');await page.waitForFunction(()=>document.querySelectorAll('.item').length===1&&document.querySelector('.item').textContent.includes('Câncer da tireoide'));await page.locator('#area').selectOption('cancer');await page.waitForFunction(()=>document.querySelectorAll('.item').length===1&&document.querySelector('.item').textContent.includes('Câncer da tireoide'));await page.locator('#area').selectOption('');await page.locator('#search').fill('68549');await page.waitForFunction(()=>document.querySelectorAll('.item').length===1);await page.locator('.item').click();await page.waitForFunction(()=>document.getElementById('player').hidden===false);await page.locator('#play').click();await page.waitForFunction(()=>document.getElementById('playStatus').textContent.includes('Reproduzindo'));await page.screenshot({path:'preview-programa.png'});await page.locator('#pause').click();await page.waitForFunction(()=>document.getElementById('playStatus').textContent.includes('Pausado'));await page.locator('#play').click();await page.locator('#search').fill('00107');await page.waitForTimeout(300);await page.locator('.item').first().click();await page.waitForFunction(()=>document.getElementById('compatibility').textContent.includes('conversão'));if(!await page.locator('#player').evaluate(e=>e.hidden))throw Error('Unsupported playback');await page.getByRole('button',{name:'Frequência livre',exact:true}).click();await page.locator('#prepareFree').click();await page.locator('#play').click();await page.waitForFunction(()=>document.getElementById('playStatus').textContent.includes('440 Hz'));await page.locator('#stop').click();await page.locator('#freeHz').fill('20000');await page.locator('#prepareFree').click();if(!await page.locator('#message').textContent().then(s=>s.includes('não conectado')))throw Error('Limit missing');await page.getByRole('button',{name:'Início',exact:true}).click();await page.screenshot({path:'preview-desktop.png'});await page.setViewportSize({width:390,height:844});await page.screenshot({path:'preview-mobile.png'});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Mobile overflow');await page.getByRole('button',{name:'Tratamentos',exact:true}).click();await page.locator('#search').fill('70371');await page.waitForFunction(()=>document.querySelectorAll('.item').length===1);await page.locator('.item').click();await page.waitForFunction(()=>document.getElementById('name').textContent!=='Carregando programa…');await page.screenshot({path:'preview-programa-mobile.png'});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Catalog mobile overflow');await browser.close();if(errors.length)throw Error(errors.join('\n'));console.log('PASS: lazy load, search, program playback, pause/resume, unsupported commands, free frequency, 20 kHz block, mobile layout; zero JS errors');})();
+(async()=>{
+ const browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE||undefined,args:['--no-sandbox']});
+ try{
+  const page=await browser.newPage({viewport:{width:1440,height:1000}});
+  const errors=[],requests=[];
+  page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
+  await page.goto(process.env.TEST_URL||'http://127.0.0.1:8765');
+  assert(!requests.some(u=>u.includes('/data/')),'Home eagerly loads database');
+  await page.route('**/data/indice.json',async route=>{await new Promise(r=>setTimeout(r,500));await route.continue()});
+  await page.locator('[data-view=programas]').first().click();
+  await page.locator('#search').fill('Cistos de Balantidium');
+  await page.waitForFunction(()=>document.querySelectorAll('#list button').length===1);
+  assert.equal(await page.locator('#areaCards button').count(),43);
+  assert(!requests.some(u=>u.includes('/parte-')),'Catalog eagerly loads sequences');
+  await page.locator('#list button').click();
+  await page.waitForFunction(()=>document.querySelectorAll('#packages .item').length===2);
+  for(const [i,steps] of [[0,6],[1,2]]){
+   await page.locator('#packages .item').nth(i).click();
+   await page.waitForFunction(()=>!document.querySelector('#player').hidden);
+   await page.locator('#play').click();
+   await page.waitForFunction(n=>document.querySelector('#playStatus').textContent.includes('Reproduzindo')&&document.querySelector('#playStatus').textContent.includes('Etapa 1 de '+n),steps);
+   await page.locator('#pause').click();assert.match(await page.locator('#playStatus').innerText(),/Pausado/);
+   await page.locator('#play').click();await page.waitForFunction(()=>document.querySelector('#playStatus').textContent.includes('Reproduzindo'));
+   await page.locator('#stop').click();
+  }
+  await page.evaluate(()=>{const input=document.querySelector('#search');input.value='tireoide';input.dispatchEvent(new Event('input'));document.querySelector('#backAreas').click()});
+  await page.waitForTimeout(350);
+  assert.equal(await page.locator('#areaCards').evaluate(e=>e.hidden),false);
+  assert.equal(await page.locator('#list button').count(),0);
+  await page.selectOption('#area','indice');
+  for(const [id,label] of [['51210','interpretação pendente'],['70582','Requer Box'],['72747','Requer Box'],['87768','Requer Box'],['82693','Requer Box']]){
+   const previous=await page.locator('#list').textContent();
+   await page.locator('#search').fill(id);await page.waitForFunction(({label,previous})=>{const text=document.querySelector('#list').textContent;return text!==previous&&text.includes(label)},{label,previous});
+   if(['87768','82693'].includes(id))assert.match(await page.locator('#list').innerText(),/interpretação pendente/);
+   await page.locator('#list button').first().click();await page.waitForFunction(()=>document.querySelector('#packages .item')?.disabled);
+   if(['87768','82693'].includes(id))assert.match(await page.locator('#packages').innerText(),/Requer Box.*Interpretação pendente/s);
+  }
+  await page.locator('[data-view=livre]').first().click();
+  for(const hz of ['9.6','20000','25000']){
+   await page.locator('#freeHz').fill(hz);await page.locator('#prepareFree').click();
+   assert.match(await page.locator('#message').innerText(),/Requer Box/);assert(await page.locator('#player').evaluate(e=>e.hidden));
+  }
+  await page.locator('#freeHz').fill('440');await page.locator('#prepareFree').click();await page.locator('#play').click();
+  await page.waitForFunction(()=>document.querySelector('#playStatus').textContent.includes('Reproduzindo'));
+  assert.equal(await page.locator('#noise').inputValue(),'0');
+  await page.locator('[data-view=home]').first().click();assert.match(await page.locator('#playStatus').innerText(),/Parado/);
+  const signal=await page.evaluate(async()=>{
+   const {Player,compile}=await import('./engine.mjs');const ctx=new OfflineAudioContext(1,48000,48000);
+   const p=new Player(()=>{});p.plan=compile([0,'test','',[],'440=1',0,180,1]);
+   p.ctx=ctx;p.started=0;p.gain=ctx.createGain();p.gain.connect(ctx.destination);p.noiseGate=ctx.createGain();p.schedule(0);
+   const d=(await ctx.startRendering()).getChannelData(0);let crossings=0,sum=0;
+   for(let i=4800;i<43200;i++){sum+=d[i]*d[i];if(d[i-1]<=0&&d[i]>0)crossings++}
+   return {hz:crossings/.8,rms:Math.sqrt(sum/38400)};
+  });
+  assert(Math.abs(signal.hz-440)<2,JSON.stringify(signal));assert(signal.rms>.5);
+  await page.setViewportSize({width:390,height:844});assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
+  await page.locator('[data-view=programas]').first().click();assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
+  assert.deepEqual(errors,[]);
+  console.log('PASS: deferred search, return to areas, lazy load, original sequences, pause/resume, early Box notices, pending commands, free frequency, navigation, mobile, 440 Hz signal without noise');
+ }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exit(1)});

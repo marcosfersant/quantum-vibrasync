@@ -42,3 +42,12 @@ assert.equal(compile(balantidium.find(r=>r[0]===71161)).steps.length,2);
 
 assert.equal(codes.get(70582),'external');
 player.load(compile(row('9.6')));await player.play();assert.equal(player.state,'stopped');
+
+// Mixed requirements must show both notices, regardless of the first parser reason.
+for(const id of [87768,87769,82693]){
+ const item=index.find(r=>r[0]===id);assert.equal(item[8],true);assert.equal(item[9],true);
+}
+for(const item of index){
+ if(item[4]==='audio'){assert.equal(item[8],false);assert.equal(item[9],false);}
+}
+console.log('PASS: avisos simultâneos de Box e interpretação pendente');
