@@ -1,7 +1,7 @@
 // Syntax reference: official Spooky2 User's Guide 2025-01-24, pp.73–74,142.
 // Operational output policy, not a universal hearing threshold. Zero is a programmed rest.
-export function requiresBox(hz,endHz=hz){return !(hz===0&&endHz===0)&&(Math.max(hz,endHz)>=20000)}
-export const BOX_MESSAGE='Requer Box gerador de frequências — não conectado. Gerador acima de 20.000 Hz não conectado. Sequência original preservada.';
+export function requiresBox(hz,endHz=hz){return !(hz===0&&endHz===0)&&(Math.min(hz,endHz)<20||Math.max(hz,endHz)>=20000)}
+export const BOX_MESSAGE='Requer Box gerador de frequências — não conectado. Programa fora da faixa de áudio adotada: abaixo de 20 Hz ou a partir de 20.000 Hz. Sequência original preservada.';
 export const waveMap={1:'sine',2:'square',3:'sawtooth',5:'triangle'};
 const NUMBER='(?:\\d+(?:\\.\\d*)?|\\.\\d+)';
 const TARGET=new RegExp(`^(\\[[^\\]]+\\]|(?:BLR|BCR|BLm|BCm|BL|BC|B|M|L)?${NUMBER})(?:-(${NUMBER}))?`);
