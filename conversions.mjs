@@ -31,8 +31,8 @@ export function convertTarget(p,profile=CONVERSION_PROFILE){
   hz=profile.lightSpeed/(p.value*1e-9);kind='wavelength';
  }else if(['B','BL','BC','BLR','BCR','BLm','BCm'].includes(p.prefix)){
   if(!Number.isSafeInteger(p.value)||p.value<=0)throw Error('Contagem de bases inválida');
-  // B is the legacy linear alias (French guide Sep 2024, pp.207–208).
-  effectiveBases=p.value-(p.prefix.startsWith('BC')?0:1);
+  // Recovered ConvDbaseFreq notes (19 Aug 2026): only explicit L subtracts one.
+  effectiveBases=p.value-(p.prefix.startsWith('BL')?1:0);
   if(effectiveBases<=0)throw Error('Genoma linear precisa de pelo menos duas bases');
   kind=p.prefix.endsWith('R')?'rna':p.prefix.endsWith('m')?'mrna':'dna';
   hz=profile[kind]/effectiveBases;
