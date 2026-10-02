@@ -1,3 +1,4 @@
+import {convertTarget,CONVERSION_PROFILE} from './conversions.mjs';
 // Syntax reference: official Spooky2 User's Guide 2025-01-24, pp.73–74,142.
 // Operational output policy, not a universal hearing threshold. Zero is a programmed rest.
 export function requiresBox(hz,endHz=hz){return !(hz===0&&endHz===0)&&(Math.min(hz,endHz)<20||Math.max(hz,endHz)>=20000)}
@@ -5,7 +6,6 @@ export const BOX_MESSAGE='Requer Box gerador de frequências — não conectado.
 export const waveMap={1:'sine',2:'square',3:'sawtooth',5:'triangle'};
 const NUMBER='(?:\\d+(?:\\.\\d*)?|\\.\\d+)';
 const TARGET=new RegExp(`^(\\[[^\\]]+\\]|(?:BLR|BCR|BLm|BCm|BL|BC|B|M|L)?${NUMBER})(?:-(${NUMBER}))?`);
-const labels={B:'DNA: fator de pares de bases',BL:'DNA linear',BC:'DNA circular',BLR:'Variante BLR',BCR:'Variante BCR',BLm:'Variante BLm',BCm:'Variante BCm',M:'Peso molecular',L:'Comprimento de onda',formula:'Fórmula química'};
 export function parseCommand(raw,defaultSeconds){
  const match=raw.trim().match(TARGET);if(!match)throw Error('Comando não reconhecido: '+raw);
  const target=match[1],prefix=target.startsWith('[')?'formula':(target.match(/^[A-Za-z]+/)?.[0]||'Hz');
@@ -24,25 +24,34 @@ export function parseCommand(raw,defaultSeconds){
 export function compile(row){
  const raw=String(row[4]||'').trim(),tokens=raw.split(',').map(s=>s.trim());if(tokens.at(-1)==='')tokens.pop();
  let parsed;try{if(!tokens.length||tokens.some(s=>!s))throw Error('Sequência vazia ou incompleta');parsed=tokens.map(s=>parseCommand(s,row[6]));}catch(e){return {error:e.message,code:'syntax',steps:[],parsed:[]}}
- let wave=waveMap[row[7]],reasons=[];const steps=[];
+ let wave=waveMap[row[7]],settings={waveform:Number(row[7]),gate:false,amplitudeVpp:null},reasons=[];const steps=[];
+ const simultaneous=row[2]==='RRMD'; // All 10,679 RRMD rows verified against DatabaseText.txt.
  if(/infrared|infravermelh|\blaser\b|red light|luz vermelha|light mat|placa luminosa|beam ray|feixe de luz|\bpemf\b|pulsed e(?:lectric|lectromagnetic)? field|campo eletromagnetico pulsado/i.test(row[1]))reasons.push({code:'external',text:BOX_MESSAGE});
  if(!wave)reasons.push({code:'wave',text:'Forma de onda original ainda não suportada.'});
  for(const p of parsed){
-  for(const d of p.directives){if(d.command==='W'&&waveMap[d.value])wave=waveMap[d.value];else reasons.push({code:'hardware',text:`Diretiva ${d.command}${d.value} ainda não foi implementada e validada.`})}
-  if(p.prefix!=='Hz'){reasons.push({code:'conversion',text:`${labels[p.prefix]||p.prefix}: interpretação ainda não implementada e validada. Comando original preservado.`});continue}
-  if(requiresBox(p.value,p.end))reasons.push({code:'external',text:BOX_MESSAGE});
-  steps.push({hz:p.value,endHz:p.end,seconds:p.seconds,wave,rest:p.value===0&&p.end===0});
+  for(const d of p.directives){
+   if(d.command==='W'&&waveMap[d.value]){wave=waveMap[d.value];settings.waveform=d.value;}
+   else if(d.command==='G'&&d.value===0)settings.gate=false;
+   else if(d.command==='A'&&d.value>=0&&d.value<=20){settings.amplitudeVpp=d.value;reasons.push({code:'external',text:'Requer Box gerador de frequências: tensão de saída em volts especificada no programa.'});}
+   else reasons.push({code:'hardware',text:`Diretiva ${d.command}${d.value} ainda não foi implementada e validada.`});
+  }
+  let converted;try{converted=convertTarget(p)}catch(e){reasons.push({code:'conversion',text:e.message});continue;}
+  if(requiresBox(converted.hz,converted.endHz))reasons.push({code:'external',text:BOX_MESSAGE});
+  steps.push({...converted,seconds:p.seconds,wave,rest:converted.hz===0&&converted.endHz===0,output:{...settings}});
  }
+ if(simultaneous)reasons.push({code:'external',text:'Requer Box gerador de frequências com saídas simultâneas compatíveis com o programa.'});
  reasons=reasons.filter((v,i,a)=>a.findIndex(x=>x.text===v.text)===i);
- const totalSeconds=parsed.reduce((a,p)=>a+p.seconds,0);
- return {steps,parsed,wave:waveMap[row[7]],totalSeconds,reasons,code:reasons[0]?.code||'audio',error:reasons.length?reasons.map(r=>r.text).join(' '):undefined};
+ const totalSeconds=simultaneous?Math.max(...parsed.map(p=>p.seconds)):parsed.reduce((a,p)=>a+p.seconds,0);
+ let offset=0;const events=steps.map((s,i)=>{const event={step:i,startSeconds:simultaneous?0:offset,durationSeconds:s.seconds};offset+=s.seconds;return event;});
+ const execution={mode:simultaneous?'simultaneous':'sequential',events,outputConnected:false};
+ return {steps,parsed,wave:waveMap[row[7]],totalSeconds,reasons,execution,conversionProfile:CONVERSION_PROFILE.id,code:reasons[0]?.code||'audio',error:reasons.length?reasons.map(r=>r.text).join(' '):undefined};
 }
 export class Player{
  constructor(onStatus,contextFactory=()=>new (window.AudioContext||window.webkitAudioContext)()){this.onStatus=onStatus;this.contextFactory=contextFactory;this.token=0;this.state='stopped';this.tone=.1;this.noise=0;this.scale=1;this.repeat=false;this.waveOverride='original';this.index=0;this.elapsed=0;this.position=0;this.nodes=[]}
  load(plan){this.stop();this.plan=plan;this.report()}
  duration(){return this.plan.steps.reduce((a,s)=>a+s.seconds*this.scale,0)}
  async play(){if(!this.plan||this.plan.error||this.state==='playing'||this.state==='starting')return;const token=++this.token;this.state='starting';this.report();try{
- if(this.plan.steps.some(s=>requiresBox(s.hz,s.endHz??s.hz)))throw Error(BOX_MESSAGE);
+ if(this.plan.execution?.mode==='simultaneous'||this.plan.steps.some(s=>requiresBox(s.hz,s.endHz??s.hz)||s.output?.amplitudeVpp!=null))throw Error(BOX_MESSAGE);
  const ctx=this.contextFactory();this.ctx=ctx;await ctx.resume();if(token!==this.token)return;
  if(this.plan.steps.some(s=>Math.max(s.hz,s.endHz??s.hz)>=ctx.sampleRate/2))throw Error('Frequência fora da capacidade desta saída de áudio.');
  this.gain=ctx.createGain();this.noiseGain=ctx.createGain();this.noiseGate=ctx.createGain();this.gain.connect(ctx.destination);this.noiseGain.connect(this.noiseGate);this.noiseGate.connect(ctx.destination);this.gain.gain.value=0;this.noiseGain.gain.value=0;this.noiseGate.gain.value=0;

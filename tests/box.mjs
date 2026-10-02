@@ -14,10 +14,11 @@ for(const f of fs.readdirSync('data').filter(f=>/^parte-.*\.json$/.test(f)))for(
 assert.equal(codes.get(89136),'audio');
 console.log('PASS: limites, varreduras, pausas, bloqueio e 90.893 classificações publicadas');
 
-assert.equal(codes.get(51210),'conversion');
+assert.equal(codes.get(51210),'external');
 assert.equal(index.find(r=>r[0]===51210)[7],false);
 assert.equal(index.find(r=>r[0]===89136)[7],true);
-assert.equal(compile(row('M421.133729421')).steps.length,0);
+assert.equal(compile(row('M421.133729421')).steps.length,1);
+assert(compile(row('M421.133729421')).steps[0].hz>20000);
 
 for(const id of [71263,74623,77130,78518,78610,61255,61335,64047,84762,89157]){
  const item=index.find(r=>r[0]===id);assert(item[6].includes('tireoide'),`Tireoide ausente: ${id}`);assert.equal(item[7],true);
@@ -43,11 +44,11 @@ assert.equal(compile(balantidium.find(r=>r[0]===71161)).steps.length,2);
 assert.equal(codes.get(70582),'external');
 player.load(compile(row('9.6')));await player.play();assert.equal(player.state,'stopped');
 
-// Mixed requirements must show both notices, regardless of the first parser reason.
+// Previously mixed requirements are now fully parsed but require external output.
 for(const id of [87768,87769,82693]){
- const item=index.find(r=>r[0]===id);assert.equal(item[8],true);assert.equal(item[9],true);
+ const item=index.find(r=>r[0]===id);assert.equal(item[8],true);assert.equal(item[9],false);
 }
 for(const item of index){
  if(item[4]==='audio'){assert.equal(item[8],false);assert.equal(item[9],false);}
 }
-console.log('PASS: avisos simultâneos de Box e interpretação pendente');
+console.log('PASS: comandos convertidos e requisitos de saída externa classificados');

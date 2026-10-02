@@ -1,0 +1,291 @@
+{
+  "profile": {
+    "id": "genome-20220329-mw-20250124-fundamental",
+    "dna": 155518226281848000,
+    "rna": 161853600781306000,
+    "mrna": 150677502217234000,
+    "molecularWeight": 2.2523430883e+23,
+    "lightSpeed": 299792458,
+    "harmonicDivisor": 1,
+    "inhibitFactor": 1
+  },
+  "sourceRecordsSHA256": "c8ace46ff7e307f4c58260bc69f345b7d4e050b8a8aad30eec642b06388260db",
+  "programs": 90893,
+  "counts": {
+    "external": 86356,
+    "audio": 4537
+  },
+  "convertedPrograms": 68574,
+  "convertedCommands": 129993,
+  "simultaneousPrograms": 10679,
+  "pendingPrograms": 0,
+  "examples": [
+    {
+      "id": 1,
+      "command": "BL3622",
+      "prefix": "BL",
+      "step": {
+        "hz": 42948971632656.17,
+        "endHz": 42948971632656.17,
+        "conversion": {
+          "command": "BL3622",
+          "kind": "dna",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "effectiveBases": 3621,
+          "fundamentalHz": 42948971632656.17,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 3,
+      "command": "BC2899315",
+      "prefix": "BC",
+      "step": {
+        "hz": 53639644633.938705,
+        "endHz": 53639644633.938705,
+        "conversion": {
+          "command": "BC2899315",
+          "kind": "dna",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "effectiveBases": 2899315,
+          "fundamentalHz": 53639644633.938705,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 4,
+      "command": "BLR28754",
+      "prefix": "BLR",
+      "step": {
+        "hz": 5629103077289.534,
+        "endHz": 5629103077289.534,
+        "conversion": {
+          "command": "BLR28754",
+          "kind": "rna",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "effectiveBases": 28753,
+          "fundamentalHz": 5629103077289.534,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 809,
+      "command": "BCR8061",
+      "prefix": "BCR",
+      "step": {
+        "hz": 20078600766816.273,
+        "endHz": 20078600766816.273,
+        "conversion": {
+          "command": "BCR8061",
+          "kind": "rna",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "effectiveBases": 8061,
+          "fundamentalHz": 20078600766816.273,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 1349,
+      "command": "BLm8350",
+      "prefix": "BLm",
+      "step": {
+        "hz": 18047371208196.668,
+        "endHz": 18047371208196.668,
+        "conversion": {
+          "command": "BLm8350",
+          "kind": "mrna",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "effectiveBases": 8349,
+          "fundamentalHz": 18047371208196.668,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 2701,
+      "command": "BCm333",
+      "prefix": "BCm",
+      "step": {
+        "hz": 452484991643345.3,
+        "endHz": 452484991643345.3,
+        "conversion": {
+          "command": "BCm333",
+          "kind": "mrna",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "effectiveBases": 333,
+          "fundamentalHz": 452484991643345.3,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 37659,
+      "command": "B3214946",
+      "prefix": "B",
+      "step": {
+        "hz": 48373526228.86177,
+        "endHz": 48373526228.86177,
+        "conversion": {
+          "command": "B3214946",
+          "kind": "dna",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "effectiveBases": 3214945,
+          "fundamentalHz": 48373526228.86177,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 51051,
+      "command": "M204.187800773",
+      "prefix": "M",
+      "step": {
+        "hz": 4.599009817862439e+25,
+        "endHz": 4.599009817862439e+25,
+        "conversion": {
+          "command": "M204.187800773",
+          "kind": "molecularWeight",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "mass": 204.187800773,
+          "fundamentalHz": 4.599009817862439e+25,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 68549,
+      "command": "40",
+      "prefix": "Hz",
+      "step": {
+        "hz": 40,
+        "endHz": 40,
+        "conversion": null,
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 80569,
+      "command": "[C47H72O14]",
+      "prefix": "formula",
+      "step": {
+        "hz": 1.9381236749601652e+26,
+        "endHz": 1.9381236749601652e+26,
+        "conversion": {
+          "command": "[C47H72O14]",
+          "kind": "molecularWeight",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "mass": 860.4922069945401,
+          "fundamentalHz": 1.9381236749601652e+26,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    },
+    {
+      "id": 88058,
+      "command": "L470",
+      "prefix": "L",
+      "step": {
+        "hz": 637856293617021.2,
+        "endHz": 637856293617021.2,
+        "conversion": {
+          "command": "L470",
+          "kind": "wavelength",
+          "profile": "genome-20220329-mw-20250124-fundamental",
+          "fundamentalHz": 637856293617021.2,
+          "harmonicDivisor": 1
+        },
+        "seconds": 180,
+        "wave": "sine",
+        "rest": false,
+        "output": {
+          "waveform": 1,
+          "gate": false,
+          "amplitudeVpp": null
+        }
+      }
+    }
+  ]
+}
