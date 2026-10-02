@@ -73,5 +73,7 @@ for(const [id,areas,name,visible] of recovery.additions){
  if(name&&row[1]===originals.get(id)[1])row[1]=name;
  if(visible)row[7]=true;
 }
+// Confirmed translation mismatch: both source variants belong to one named group.
+for(const id of [71160,71161])byId.get(id)[1]='Cistos de Balantidium coli';
 fs.writeFileSync('dist/data/indice.json',JSON.stringify(index));
 console.log('Classificação de saída:',index.reduce((a,r)=>(a[r[4]]=(a[r[4]]||0)+1,a),{}));

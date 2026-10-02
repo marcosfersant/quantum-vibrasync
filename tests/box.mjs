@@ -34,3 +34,8 @@ for(const [id,areas,name,visible] of recovered.additions){
 }
 for(const id of recovered.thyroidV5)assert(index.find(r=>r[0]===id)[6].includes('tireoide'));
 console.log('PASS: todos os vínculos recuperados da V5 presentes no catálogo publicado');
+
+assert.equal(index.find(r=>r[0]===71160)[1],index.find(r=>r[0]===71161)[1]);
+const balantidium=JSON.parse(fs.readFileSync('data/parte-071.json'));
+assert.equal(compile(balantidium.find(r=>r[0]===71160)).steps.length,6);
+assert.equal(compile(balantidium.find(r=>r[0]===71161)).steps.length,2);
