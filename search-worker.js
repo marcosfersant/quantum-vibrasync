@@ -32,7 +32,7 @@ onmessage=async({data})=>{try{
  const name=qvNomeBase(r[1]),key=normalize(name);if(!groups.has(key))groups.set(key,{key,name,rows:[]});groups.get(key).rows.push(r);programs++;
  }});
  const list=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
- lastSearch=searchKey;lastPrograms=programs;lastList=list.map(g=>({key:g.key,name:g.name,count:g.rows.length,box:g.rows.filter(r=>r[8]||r[4]==='external').length,pending:g.rows.filter(r=>r[9]||!['audio','external'].includes(r[4])).length}));
+ lastSearch=searchKey;lastPrograms=programs;lastList=list.map(g=>({key:g.key,name:g.name,count:g.rows.length,box:g.rows.filter(r=>r[8]).length,mixed:g.rows.filter(r=>r[4]==='mixed').length,pending:g.rows.filter(r=>r[9]).length}));
  postMessage({type:'results',request:data.request,count:list.length,programs,page:data.page,groups:lastList.slice(data.page*50,(data.page+1)*50)});
  }
 }catch(e){postMessage({type:'error',message:e.message})}};

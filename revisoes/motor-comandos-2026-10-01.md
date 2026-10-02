@@ -1,5 +1,7 @@
 # Motor dos comandos presentes no banco — 01/10/2026
 
+> Classificação superada pela [revisão por etapas](classificacao-etapas-2026-10-02.md). Os cálculos fundamentais abaixo não confirmam presets V7 nem a saída final de cada programa.
+
 ## Mudança entregue
 
 O motor anterior identificava as letras, mas descartava suas etapas executáveis e marcava conversão pendente. Agora converte 129.993 comandos em 68.574 programas para valores fundamentais calculados, preservando o texto original, ordem, repetições, duração e perfil de cálculo. Não há redução de oitavas para encaixar as frequências no áudio.

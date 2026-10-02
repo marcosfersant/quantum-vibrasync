@@ -2,23 +2,24 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {compile,Player} from '../engine.mjs';
 const row=c=>[0,'test','',[],c,0,180,1];
-for(const f of [0.1,9.6,19,19.999,20000,25000])assert.equal(compile(row(`440,${f},537`)).code,'external');
-for(const f of [20,20.1,440,537,17999,18000,19000,19999])assert.equal(compile(row(String(f))).code,'audio');
+for(const f of [0.1,9.6,19,19.999,20001,25000])assert.equal(compile(row(`440,${f},537`)).code,'mixed');
+for(const f of [20,20.1,440,537,17999,18000,19000,19999,20000])assert.equal(compile(row(String(f))).code,'audio');
 assert.equal(compile(row('0=5,440')).code,'audio');
-for(const c of ['440-20000','20000-440','9.6-440','440-9.6','0-440'])assert.equal(compile(row(c)).code,'external');
+for(const c of ['440-20001','20001-440','9.6-440','440-9.6','0-440'])assert.equal(compile(row(c)).code,'external');
 const player=new Player(()=>{},()=>{throw Error('Output must not open')});
-player.load(compile(row('20000,537')));await player.play();assert.equal(player.state,'stopped');
+player.load(compile(row('20001,537')));await player.play();assert.equal(player.state,'blocked');
 const index=JSON.parse(fs.readFileSync('dist/data/indice.json'));
 const codes=new Map(index.map(r=>[r[0],r[4]]));
 for(const f of fs.readdirSync('data').filter(f=>/^parte-.*\.json$/.test(f)))for(const r of JSON.parse(fs.readFileSync('data/'+f)))assert.equal(codes.get(r[0]),compile(r).code);
 assert.equal(codes.get(89136),'audio');
 console.log('PASS: limites, varreduras, pausas, bloqueio e 90.893 classificações publicadas');
 
-assert.equal(codes.get(51210),'external');
+assert.equal(codes.get(51210),'pending');
 assert.equal(index.find(r=>r[0]===51210)[7],false);
 assert.equal(index.find(r=>r[0]===89136)[7],true);
 assert.equal(compile(row('M421.133729421')).steps.length,1);
-assert(compile(row('M421.133729421')).steps[0].hz>20000);
+assert.equal(compile(row('M421.133729421')).steps[0].hz,null);
+assert(compile(row('M421.133729421')).steps[0].referenceHz>20000);
 
 for(const id of [71263,74623,77130,78518,78610,61255,61335,64047,84762,89157]){
  const item=index.find(r=>r[0]===id);assert(item[6].includes('tireoide'),`Tireoide ausente: ${id}`);assert.equal(item[7],true);
@@ -42,13 +43,10 @@ assert.equal(compile(balantidium.find(r=>r[0]===71160)).steps.length,6);
 assert.equal(compile(balantidium.find(r=>r[0]===71161)).steps.length,2);
 
 assert.equal(codes.get(70582),'external');
-player.load(compile(row('9.6')));await player.play();assert.equal(player.state,'stopped');
+player.load(compile(row('9.6')));await player.play();assert.equal(player.state,'blocked');
 
-// Previously mixed requirements are now fully parsed but require external output.
-for(const id of [87768,87769,82693]){
- const item=index.find(r=>r[0]===id);assert.equal(item[8],true);assert.equal(item[9],false);
-}
-for(const item of index){
- if(item[4]==='audio'){assert.equal(item[8],false);assert.equal(item[9],false);}
-}
-console.log('PASS: comandos convertidos e requisitos de saída externa classificados');
+// Mixed sequences preserve independent external and pending requirements.
+for(const id of [87768,87769]){const item=index.find(r=>r[0]===id);assert.equal(item[4],'mixed');assert.equal(item[8],true);assert.equal(item[9],true);}
+assert.equal(index.find(r=>r[0]===82693)[4],'external');
+for(const item of index){if(item[4]==='audio'){assert.equal(item[8],false);assert.equal(item[9],false);}}
+console.log('PASS: avaliação por etapa e presets não confirmados sem falso rótulo Box');
