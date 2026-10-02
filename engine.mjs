@@ -28,8 +28,8 @@ export function compile(row){
  if(/infrared|infravermelh|\blaser\b|red light|luz vermelha|light mat|placa luminosa|beam ray|feixe de luz|\bpemf\b|pulsed e(?:lectric|lectromagnetic)? field|campo eletromagnetico pulsado/i.test(row[1]))reasons.push({code:'external',text:BOX_MESSAGE});
  if(!wave)reasons.push({code:'wave',text:'Forma de onda original ainda não suportada.'});
  for(const p of parsed){
-  for(const d of p.directives){if(d.command==='W'&&waveMap[d.value])wave=waveMap[d.value];else reasons.push({code:'hardware',text:`Diretiva ${d.command}${d.value} exige saída ou configuração de hardware compatível.`})}
-  if(p.prefix!=='Hz'){reasons.push({code:'external',text:`${labels[p.prefix]||p.prefix}: requer Box gerador de frequências. Comando original preservado.`});continue}
+  for(const d of p.directives){if(d.command==='W'&&waveMap[d.value])wave=waveMap[d.value];else reasons.push({code:'hardware',text:`Diretiva ${d.command}${d.value} ainda não foi implementada e validada.`})}
+  if(p.prefix!=='Hz'){reasons.push({code:'conversion',text:`${labels[p.prefix]||p.prefix}: interpretação ainda não implementada e validada. Comando original preservado.`});continue}
   if(requiresBox(p.value,p.end))reasons.push({code:'external',text:BOX_MESSAGE});
   steps.push({hz:p.value,endHz:p.end,seconds:p.seconds,wave,rest:p.value===0&&p.end===0});
  }
