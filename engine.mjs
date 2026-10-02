@@ -57,6 +57,7 @@ export function compile(row,presetConfig){
   const statusExecucao=pending?STEP_STATUS.pending:external?STEP_STATUS.external:result.rest?STEP_STATUS.rest:STEP_STATUS.audio;
   let observacao=pending?(problem||[...unknown.values()].join('; ')||'Configuração do preset não confirmada. Cálculo base é apenas referência.'):
    external?(simultaneous?'Requer saída simultânea compatível com o programa.':output.amplitudeVpp!=null?'Requer Box com tensão de saída especificada.':specialOutput?'Requer modalidade de saída externa compatível.':BOX_MESSAGE):result.rest?'Pausa original, sem som':'Etapa disponível para áudio; audibilidade depende do equipamento e da pessoa.';
+  if(!pending&&result?.harmonic)observacao+=' Sub-harmônico por '+result.harmonic.octaves+' oitavas: '+result.hz+' Hz. Fundamental calculada: '+result.referenceHz+' Hz. Não é a frequência fundamental original.';
   if(pending&&(specialOutput||output.amplitudeVpp!=null||simultaneous))observacao+=' Também requer saída externa compatível; essa exigência não confirma o preset.';
   steps.push({...result,hz:pending?null:result.hz,endHz:pending?null:result.endHz,
    etapa:i+1,comandoOriginal:token,frequenciaGerada:pending?null:result.hz,

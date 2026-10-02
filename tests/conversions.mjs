@@ -10,7 +10,8 @@ const close=(actual,expected,tolerance=1e-12)=>assert(Math.abs(actual-expected)/
 // Independent worked values in John White's Rev.2 table, p.4.
 close(target('BL29901').hz,5201278470964.83);
 close(target('BC29900').hz,5201278470964.83);
-close(target('B29901').hz,5201278470964.83);
+close(target('B29900').hz,5201278470964.83);
+assert.equal(target('B1').hz,155518226281848000);
 close(target('BLR9756').hz,16591860664408.60);
 close(target('BCR9755').hz,16591860664408.60);
 close(target('BLm9756').hz,15446181672704.60);
