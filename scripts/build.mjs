@@ -1,4 +1,3 @@
-import {OCTAVE_AUDIO_PRESET} from '../presets.mjs';
 import {compile} from '../engine.mjs';
 import fs from 'node:fs';
 fs.mkdirSync('dist',{recursive:true});
@@ -46,13 +45,11 @@ function qvProgramaTemFinalidadePublica(p){
   // isoladas continuam acessíveis no Índice completo A–Z.
   return /disease|doenca|syndrome|sindrome|cancer|tumor|carcinom|sarcom|leucem|leukem|melanom|neoplas|lymphom|linfom|myelom|mieloma|pain|\bdor\b|fever|febre|diabet|hypertens|hipertens|hypotens|hipotens|arrhythm|arritm|arthritis|artrit|infection|infeccao|inflamma|inflama|abscess|abscesso|rhinitis|rinite|sinusitis|sinusite|bronchitis|bronquite|pneumonia|asthma|asma|hepatitis|hepatite|gastritis|gastrite|colitis|colite|cystitis|cistite|dermatitis|dermatite|neuropathy|neuropatia|neuralgia|migraine|enxaqueca|seizure|convuls|paralysis|paralis|insufficiency|insuficiencia|failure|falencia|deficiency|deficiencia|disorder|disturbio|malformation|malformacao|anemia|anaemia|bleeding|sangramento|edema|ulcer|ulcera|wound|ferida|toxic|toxicity|toxico|toxicidade/.test(s);
 }
-const adaptedCounts={audio:0,mixed:0,external:0,pending:0},adaptedCodes=new Map();
 const codes=new Map(), requirements=new Map(), originals=new Map();
-for(const f of fs.readdirSync('data').filter(f=>/^parte-.*\.json$/.test(f)))for(const row of JSON.parse(fs.readFileSync('data/'+f))){const plan=compile(row),adapted=compile(row,OCTAVE_AUDIO_PRESET);adaptedCounts[adapted.code]++;adaptedCodes.set(row[0],adapted.code);codes.set(row[0],plan.code);requirements.set(row[0],plan.summary);originals.set(row[0],row);}
+for(const f of fs.readdirSync('data').filter(f=>/^parte-.*\.json$/.test(f)))for(const row of JSON.parse(fs.readFileSync('data/'+f))){const plan=compile(row);codes.set(row[0],plan.code);requirements.set(row[0],plan.summary);originals.set(row[0],row);}
 const index=JSON.parse(fs.readFileSync('data/indice.json'));
 for(const row of index){
  row[4]=codes.get(row[0]);
- row[11]=adaptedCodes.get(row[0]);
  // Independent flags retain both hardware and interpretation requirements.
  const summary=requirements.get(row[0]);
  row[8]=summary.hardware>0;
@@ -86,4 +83,4 @@ for(const id of [71160,71161])byId.get(id)[1]='Cistos de Balantidium coli';
 fs.writeFileSync('dist/data/indice.json',JSON.stringify(index));
 console.log('Classificação de saída:',index.reduce((a,r)=>(a[r[4]]=(a[r[4]]||0)+1,a),{}));
 const {engineReport}=await import('./stage-report.mjs');
-fs.writeFileSync('dist/data/status-motor.json',JSON.stringify(engineReport(index,originals,adaptedCounts),null,2)+'\n');
+fs.writeFileSync('dist/data/status-motor.json',JSON.stringify(engineReport(index,originals),null,2)+'\n');

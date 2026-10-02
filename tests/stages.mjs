@@ -23,17 +23,16 @@ const node=()=>({connect(){},disconnect(){},start(){},stop(){},gain:param(),freq
 const factory=()=>{opened++;return ctx={currentTime:0,sampleRate:48000,destination:{},createGain:node,createBuffer:()=>({getChannelData:()=>new Float32Array(10)}),createBufferSource:node,createOscillator:()=>{const n=node();n.frequency.setValueAtTime=f=>frequencies.push(f);return n;},resume:async()=>{},close:async()=>{}}};
 const p=new Player(s=>state=s,factory);
 p.load(compile(row('440,25000,880')));await p.play();
-assert.deepEqual(frequencies,[440]);ctx.currentTime=1.031;p.tick();assert.equal(p.state,'blocked');assert.equal(p.index,1);assert.equal(p.ctx,null);assert.deepEqual(p.skipped,[]);
-await p.play();assert.deepEqual(frequencies,[440]); // Iniciar cannot bypass restriction.
-await p.skipRestricted();assert.deepEqual(frequencies,[440,880]);assert.deepEqual(p.skipped,[2]);
-ctx.currentTime=1.031;p.tick();assert.equal(p.state,'finished');assert.match(state.message,/parcial/);
-assert.match(state.message,/não foi executado/);
-p.load(draft);const before=opened;await p.play();assert.equal(opened,before);assert.equal(p.state,'blocked');
-await p.skipRestricted();assert.equal(p.state,'playing');assert.deepEqual(frequencies.slice(-2),[432,528]);p.stop();
-p.load(uncertain);await p.play();ctx.currentTime=1.031;p.tick();assert.equal(p.state,'blocked');assert.equal(state.step.statusExecucao,STEP_STATUS.pending);p.stop();
-// Device capability is checked per step, even inside the nominal 20–20k range.
+assert.deepEqual(frequencies,[440,880]);assert.equal(p.duration(),2);assert.deepEqual(state.skipped,[2]);
+ctx.currentTime=1.031;p.tick();assert.equal(p.state,'playing');assert.equal(p.index,2);
+p.pause();await p.play();assert.equal(frequencies.at(-1),880);ctx.currentTime=1.04;p.tick();assert.equal(p.state,'finished');assert.match(state.message,/parcial/);assert.match(state.message,/não foi executado/);
+p.load(draft);await p.play();assert.equal(p.state,'playing');assert.equal(p.index,1);assert.deepEqual(frequencies.slice(-2),[432,528]);assert.equal(p.duration(),2);p.stop();
+p.load(uncertain);await p.play();assert.deepEqual(frequencies.slice(-2),[440,880]);assert.deepEqual(state.skipped,[2]);p.stop();
 const lowRate=new Player(()=>{},()=>{const c=factory();c.sampleRate=32000;return c;});
-lowRate.load(compile(row('440,19000,880')));await lowRate.play();assert.equal(frequencies.at(-1),440);ctx.currentTime=1.031;lowRate.tick();assert.equal(lowRate.state,'blocked');lowRate.stop();
-console.log('PASS: preset separation, mixed and unknown steps, 20k boundary, original commands, no global block, no automatic skip, explicit partial continuation, device limits');
-
+lowRate.load(compile(row('440,19000,880')));await lowRate.play();assert.deepEqual(frequencies.slice(-2),[440,880]);assert.equal(lowRate.duration(),2);lowRate.stop();
+p.load(compile(row('25000,0.15')));const before=opened;await p.play();assert.equal(opened,before);assert.equal(p.state,'blocked');
+p.load(compile(row('440,0=2,25000,880')));await p.play();assert.equal(p.duration(),4);assert.deepEqual(frequencies.slice(-2),[440,880]);p.stop();
 const both=compile([0,'test','RRMD',[],'M1',0,180,1]);assert.equal(both.code,'pending');assert.equal(both.summary.hardware,1);assert.match(both.steps[0].observacao,/Também requer saída externa/);
+console.log('PASS: original Hz, inactive stages take no time, first/middle/end restrictions, pause/resume, programmed rests, device limits, no output for wholly restricted programs');
+
+p.load(compile(row('440,25000')));await p.play();assert.equal(p.duration(),1);ctx.currentTime=1.04;p.tick();assert.equal(p.state,'finished');assert.match(state.message,/parcial/);assert.deepEqual(state.skipped,[2]);
