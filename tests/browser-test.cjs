@@ -39,37 +39,21 @@ const {chromium}=require('playwright');
    await page.waitForFunction(()=>document.querySelector('#packages .item'));
    await page.locator('#packages .item').first().click();
    await page.waitForFunction(()=>!document.querySelector('#player').hidden);
-   if(id==='51210'){assert.match(await page.locator('#sequence').innerText(),/Configuração pendente/);assert(await page.locator('#play').isDisabled());}
-   if(id==='87768'){assert.match(await page.locator('#sequence').innerText(),/Áudio disponível/);assert.match(await page.locator('#sequence').innerText(),/Configuração pendente/);assert(!await page.locator('#play').isDisabled());}
+   if(id==='51210'){assert.match(await page.locator('#sequence').innerText(),/configuração pendente/i);assert(await page.locator('#play').isDisabled());}
+   if(id==='87768'){assert.match(await page.locator('#sequence').innerText(),/Áudio disponível/);assert.match(await page.locator('#sequence').innerText(),/configuração pendente/i);assert(!await page.locator('#play').isDisabled());}
   }
-  await page.locator('#search').fill('51210');
-  await page.waitForFunction(()=>document.querySelector('#list').textContent.includes('configuração pendente'));
-  await page.locator('#list button').first().click();
-  await page.waitForFunction(()=>document.querySelector('#packages .item'));
-  await page.locator('#packages .item').first().click();
-  await page.selectOption('#executionPreset','octaves');
-  assert(!await page.locator('#play').isDisabled());
-  assert.match(await page.locator('#sequence').innerText(),/Sub-harmônico/);
-  await page.locator('#play').click();
-  await page.waitForFunction(()=>document.querySelector('#playStatus').textContent.includes('Reproduzindo'));
-  await page.selectOption('#executionPreset','original');
-  assert(await page.locator('#play').isDisabled());
   await page.locator('#search').fill('69270');
   await page.waitForFunction(()=>document.querySelector('#list').textContent.includes('Seios acessórios do nariz'));
   await page.locator('#list button').first().click();
   await page.waitForFunction(()=>document.querySelector('#packages .item'));
   await page.locator('#packages .item').first().click();
   await page.locator('#play').click();
-  await page.waitForFunction(()=>!document.querySelector('#skipStep').hidden);
-  assert.match(await page.locator('#playStatus').innerText(),/Etapa 1 de 4/);
-  page.on('dialog',dialog=>dialog.accept());
-  await page.locator('#skipStep').click();
-  await page.waitForFunction(()=>document.querySelector('#playStatus').textContent.includes('Etapa 2 de 4'));
-  await page.locator('#skipStep').click();
   await page.waitForFunction(()=>document.querySelector('#playStatus').textContent.includes('Reproduzindo'));
   assert.match(await page.locator('#playStatus').innerText(),/Etapa 3 de 4/);
   assert.match(await page.locator('#playStatus').innerText(),/parcial/);
-  assert.equal(await page.locator('#skipStep').isVisible(),false);
+  assert.match(await page.locator('#playStatus').innerText(),/inativas: 1, 2/);
+  assert.equal(await page.locator('#executionPreset').count(),0);
+  assert.equal(await page.locator('#skipStep').count(),0);
   await page.locator('#stop').click();
   await page.locator('[data-view=livre]').first().click();
   for(const hz of ['9.6','20001','25000']){
@@ -89,17 +73,6 @@ const {chromium}=require('playwright');
    return {hz:crossings/.8,rms:Math.sqrt(sum/38400)};
   });
   assert(Math.abs(signal.hz-440)<2,JSON.stringify(signal));assert(signal.rms>.5);
-  const adaptedSignal=await page.evaluate(async()=>{
-   const {Player,compile}=await import('./engine.mjs');const {OCTAVE_AUDIO_PRESET}=await import('./presets.mjs');
-   const ctx=new OfflineAudioContext(1,48000,48000),p=new Player(()=>{});
-   p.plan=compile([0,'test','',[],'M1=1',0,180,1],OCTAVE_AUDIO_PRESET);
-   p.ctx=ctx;p.started=0;p.gain=ctx.createGain();p.gain.connect(ctx.destination);p.noiseGate=ctx.createGain();p.schedule(0);
-   const d=(await ctx.startRendering()).getChannelData(0);let crossings=0,sum=0;
-   for(let i=4800;i<43200;i++){sum+=d[i]*d[i];if(d[i-1]<=0&&d[i]>0)crossings++}
-   return {expected:p.plan.steps[0].hz,hz:crossings/.8,rms:Math.sqrt(sum/38400)};
-  });
-  assert(Math.abs(adaptedSignal.hz-adaptedSignal.expected)<2,JSON.stringify(adaptedSignal));assert(adaptedSignal.rms>.5);
-
   await page.setViewportSize({width:390,height:844});assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
   await page.locator('[data-view=programas]').first().click();assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
   assert.deepEqual(errors,[]);
