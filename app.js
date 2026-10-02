@@ -34,12 +34,13 @@ const player=new Player(s=>{
  const labels={stopped:'Parado',starting:'Preparando áudio',playing:'Reproduzindo',paused:'Pausado',blocked:'Etapa restrita',finished:'Concluído',error:'Erro'};
  const value=s.step?(s.step.rest?'Pausa programada':s.step.hz==null?'Saída não confirmada':(s.step.endHz!==undefined&&s.step.endHz!==s.step.hz?s.step.hz+' → '+s.step.endHz:s.step.hz)+' Hz'):'';
  $('playStatus').textContent=s.message||((labels[s.state]||s.state)+(s.step?` · ${value} · Etapa ${s.index+1} de ${s.count} · ${Math.max(0,Math.ceil(s.step.seconds*s.scale-s.elapsed))} s`:''));
+ if(s.state==='playing'&&player.repeat)$('playStatus').textContent+=' · Repetição em loop';
  if(s.skipped.length&&s.state!=='finished')$('playStatus').textContent+=' · Reprodução parcial; etapas inativas: '+s.skipped.join(', ');
  $('progress').value=s.total?s.position/s.total:0;
  $('play').textContent=s.state==='paused'?'Continuar':s.state==='finished'?'Reiniciar':'Iniciar';
  $('pause').disabled=s.state!=='playing';
  $('wave').disabled=$('speed').disabled=s.state!=='stopped';
- $('repeat').disabled=s.state!=='stopped'||player.plan?.code==='mixed'||['pending','external'].includes(player.plan?.code);
+ $('repeat').disabled=s.state!=='stopped'||['pending','external'].includes(player.plan?.code);
  $('play').disabled=['starting','playing','blocked'].includes(s.state)||['pending','external'].includes(player.plan?.code);
  
  document.querySelectorAll('#sequence [data-step]').forEach(e=>e.classList.toggle('current-step',Number(e.dataset.step)===s.index));
@@ -55,7 +56,7 @@ function showSteps(plan){
  $('sequence').replaceChildren();
  for(const [i,step] of plan.steps.entries()){
   const item=document.createElement('div');item.className='step-card';item.dataset.step=i;item.dataset.status=step.statusExecucao;
-  const title=document.createElement('strong');title.textContent=`Etapa ${i+1} · `+({AUDIO_DISPONIVEL:'Áudio disponível',PAUSA_PROGRAMADA:'Pausa programada',REQUER_HARDWARE_EXTERNO:'Inativa — requer Box',CONFIGURACAO_PENDENTE:'Inativa — configuração pendente'}[step.statusExecucao]);
+  const title=document.createElement('strong');title.textContent=`Etapa ${i+1} · `+({AUDIO_DISPONIVEL:'Áudio disponível',PAUSA_PROGRAMADA:'Pausa programada',REQUER_HARDWARE_EXTERNO:'Pulada no áudio — requer Box',CONFIGURACAO_PENDENTE:'Inativa — configuração pendente'}[step.statusExecucao]);
   const text=document.createElement('p');text.textContent=step.observacao;
   const detail=document.createElement('small');detail.textContent=`Comando original: ${step.comandoOriginal} · ${step.seconds} s`;
   item.append(title,text,detail);$('sequence').append(item);
@@ -71,7 +72,7 @@ $('backAreas').onclick=()=>{clearTimeout(searchTimer);page=0;resetDetails();requ
 let searchTimer;$('search').oninput=()=>{clearTimeout(searchTimer);request++;searchTimer=setTimeout(()=>{page=0;search()},180)};$('bank').onchange=$('area').onchange=()=>{clearTimeout(searchTimer);page=0;search()};$('previous').onclick=()=>{page=Math.max(0,page-1);search()};$('next').onclick=()=>{if((page+1)*50<total){page++;search()}};
 async function select(r,button){const token=++selection;player.stop();current=null;$('player').hidden=true;$('name').textContent='Carregando programa…';$('export').disabled=true;try{let rows=cache.get(r[3]);if(!rows){const res=await fetch(`data/parte-${String(r[3]).padStart(3,'0')}.json`);if(!res.ok)throw Error('Falha ao carregar o programa');rows=await res.json();cache.set(r[3],rows);if(cache.size>4)cache.delete(cache.keys().next().value)}if(token!==selection)return;current=rows.find(x=>x[0]===r[0]);if(!current)throw Error('Programa não encontrado');document.querySelectorAll('.item').forEach(e=>e.classList.remove('selected'));button.classList.add('selected');$('name').textContent=r[1];$('originalName').textContent=current[1];$('originalNameDetails').hidden=r[1]===current[1];$('areasDetail').textContent=(r[6]||[]).map(id=>areaNames.get(id)||id).join(' · ');$('meta').textContent=`ID ${current[0]} · Banco ${current[2]} · ${current[5]} minutos na fonte · ${current[6]} s por passo · ${current[8]}`;$('commands').textContent=current[4];$('export').disabled=false;refreshProgram();if(innerWidth<760)$('name').scrollIntoView({block:'start'})}catch(e){if(token===selection){$('name').textContent='Não foi possível abrir';message(e.message)}}}
 function mount(container,plan){
- player.stop();$(container).append($('player'));$('player').hidden=false;$('wave').value='original';$('speed').value='1';$('repeat').checked=false;player.repeat=false;player.scale=1;player.waveOverride='original';player.load(plan);
+ player.stop();$(container).append($('player'));$('player').hidden=false;$('wave').value='original';$('speed').value='1';$('repeat').checked=container==='programPlayer';player.repeat=container==='programPlayer';player.scale=1;player.waveOverride='original';player.load(plan);
  if(['pending','external'].includes(plan.code))$('playStatus').textContent=programStatus(plan.code,[plan.summary.audio,plan.summary.rest,plan.summary.external,plan.summary.pending,plan.summary.hardware]);
 }
 $('prepareFree').onclick=()=>{const hz=Number($('freeHz').value),seconds=Number($('freeSeconds').value);player.stop();if(!Number.isFinite(hz)||hz<=0||requiresBox(hz)){$('player').hidden=true;message(Number.isFinite(hz)&&hz>0?BOX_MESSAGE:'Informe uma frequência positiva.');return}if(!Number.isFinite(seconds)||seconds<1||seconds>86400){$('player').hidden=true;message('Informe duração entre 1 e 86.400 segundos.');return}mount('freePlayer',compile([0,'Frequência livre','',[],String(hz)+'='+seconds,0,seconds,1]))};
