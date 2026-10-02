@@ -48,7 +48,7 @@ function programStatus(code,counts){
  const [audio=0,rest=0,external=0,pending=0,hardware=external]=counts||[];
  if(code==='audio')return 'Totalmente compatível com a faixa de áudio';
  if(code==='mixed')return `Reprodução parcial: etapas incompatíveis ficam inativas. Misto / parcial · ${audio+rest} etapa(s) compatível(is)`+(hardware?` · ${hardware} etapa(s) requer(em) Box para executar o programa completo`:'')+(pending?` · ${pending} com configuração pendente`:'');
- if(code==='pending')return 'Configuração do preset pendente'+(hardware?' · também contém etapas que requerem Box':'');
+ if(code==='pending')return 'Comando ou configuração não suportado'+(hardware?' · também contém etapas que requerem Box':'');
  return 'Requer Box gerador de frequências';
 }
 function showSteps(plan){

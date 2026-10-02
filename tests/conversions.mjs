@@ -5,7 +5,7 @@ import {convertTarget,formulaMass} from '../conversions.mjs';
 const row=(s,bank='TEST')=>[0,'test',bank,[],s,0,180,1,'test'];
 const target=s=>convertTarget(parseCommand(s,180));
 const confirmed={id:'test-documented-fundamental',source:'Teste explícito das fórmulas, não preset recuperado da V7',confirmed:true};
-const compileConfirmed=r=>compile(r,confirmed);
+const compileConfirmed=r=>compile(r);
 const close=(actual,expected,tolerance=1e-12)=>assert(Math.abs(actual-expected)/expected<tolerance,`${actual} != ${expected}`);
 // Independent worked values in John White's Rev.2 table, p.4.
 close(target('BL29901').hz,5201278470964.83);
@@ -54,4 +54,4 @@ for(const f of fs.readdirSync('data').filter(f=>/^parte-/.test(f)))for(const r o
 }
 assert.equal(totals.programas,90893);assert.equal(totals.audio,4542);assert(totals.external>0);assert(totals.mixed>0);assert.equal(totals.pending,0);assert.equal(totals.simultaneous,10679);
 console.log('PASS: fórmulas publicadas, valores finitos, nenhuma etapa perdida, saídas simultâneas, diretivas presentes e bloqueio físico');
-console.log('Contagens com preset sintético confirmado apenas para testar as fórmulas (não representam o catálogo publicado):',JSON.stringify(totals,null,2));
+console.log('Contagens reais com conversão fundamental sem preset obrigatório:',JSON.stringify(totals,null,2));

@@ -52,12 +52,12 @@ export function compile(row,presetConfig){
    result=applyPreset(p,preset);
   }catch(e){problem=e.message;if(!p)parsed.push({raw:token,error:e.message,seconds:Number(row[6])||0});}
   const output={...settings};
-  const pending=!!problem||!result?.preset.confirmed||!wave||unknown.size>0||(simultaneous&&!preset.confirmed);
+  const pending=!!problem||!result||!wave||unknown.size>0;
   const external=specialOutput||output.amplitudeVpp!=null||simultaneous||(!pending&&requiresBox(result.hz,result.endHz));
   const statusExecucao=pending?STEP_STATUS.pending:external?STEP_STATUS.external:result.rest?STEP_STATUS.rest:STEP_STATUS.audio;
-  let observacao=pending?(problem||[...unknown.values()].join('; ')||'Configuração do preset não confirmada. Cálculo base é apenas referência.'):
+  let observacao=pending?(problem||[...unknown.values()].join('; ')||'Forma de onda não suportada.'):
    external?(simultaneous?'Requer saída simultânea compatível com o programa.':output.amplitudeVpp!=null?'Requer Box com tensão de saída especificada.':specialOutput?'Requer modalidade de saída externa compatível.':BOX_MESSAGE):result.rest?'Pausa original, sem som':'Etapa disponível para áudio; audibilidade depende do equipamento e da pessoa.';
-  if(pending&&(specialOutput||output.amplitudeVpp!=null||simultaneous))observacao+=' Também requer saída externa compatível; essa exigência não confirma o preset.';
+  if(pending&&(specialOutput||output.amplitudeVpp!=null||simultaneous))observacao+=' Também requer saída externa compatível; há também um comando ainda não executável.';
   steps.push({...result,hz:pending?null:result.hz,endHz:pending?null:result.endHz,
    etapa:i+1,comandoOriginal:token,frequenciaGerada:pending?null:result.hz,
    seconds:p?.seconds??(Number(row[6])||0),wave,output,statusExecucao,observacao,
