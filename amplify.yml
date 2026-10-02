@@ -5,6 +5,7 @@ frontend:
       commands:
         - node tests/verify.mjs
         - node tests/conversions.mjs
+        - node tests/stages.mjs
         - node tests/translations.mjs
         - node scripts/build.mjs
         - node tests/box.mjs
