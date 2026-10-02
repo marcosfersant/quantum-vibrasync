@@ -14,7 +14,7 @@ for(const f of fs.readdirSync('data').filter(f=>/^parte-.*\.json$/.test(f)))for(
 assert.equal(codes.get(89136),'audio');
 console.log('PASS: limites, varreduras, pausas, bloqueio e 90.893 classificações publicadas');
 
-assert.equal(codes.get(51210),'external');
+assert.equal(codes.get(51210),'conversion');
 assert.equal(index.find(r=>r[0]===51210)[7],false);
 assert.equal(index.find(r=>r[0]===89136)[7],true);
 assert.equal(compile(row('M421.133729421')).steps.length,0);
