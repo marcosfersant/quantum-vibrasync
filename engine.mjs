@@ -78,7 +78,7 @@ export class Player{
  constructor(onStatus,contextFactory=()=>new (window.AudioContext||window.webkitAudioContext)()){
   this.onStatus=onStatus;this.contextFactory=contextFactory;this.token=0;this.state='stopped';this.tone=.1;this.noise=0;this.scale=1;this.repeat=false;this.waveOverride='original';this.index=0;this.elapsed=0;this.position=0;this.nodes=[];this.skipped=[];
  }
- load(plan){this.stop();this.plan=plan;this.audioRate=Infinity;if(plan.code&&plan.code!=='audio')this.repeat=false;this.report()}
+ load(plan){this.stop();this.plan=plan;this.audioRate=Infinity;if(!this.timeline().length)this.repeat=false;this.report()}
  timeline(rate=this.audioRate??Infinity){
   if(this.plan?.execution?.mode==='simultaneous')return [];
   let offset=0;return (this.plan?.steps||[]).flatMap((step,index)=>{
@@ -93,7 +93,6 @@ export class Player{
  async play(){
   if(!this.plan||this.plan.error||this.state==='playing'||this.state==='starting'||this.state==='blocked')return;
   if(this.state==='finished'){this.position=0;this.index=0;this.elapsed=0;this.skipped=[];}
-  if(this.plan.code!=='audio')this.repeat=false;
   this.message='';if(!this.timeline().length){this.block();return;}
   const token=++this.token;this.state='starting';this.report();
   try{
