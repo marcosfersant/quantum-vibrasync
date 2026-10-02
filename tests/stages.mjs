@@ -4,13 +4,13 @@ const row=c=>[0,'test','',[],c,0,1,1];
 const draft=compile(row('0.15,432.00,528.00'));
 assert.equal(draft.code,'mixed');assert.deepEqual(draft.steps.map(s=>s.statusExecucao),[STEP_STATUS.external,STEP_STATUS.audio,STEP_STATUS.audio]);
 assert.deepEqual(draft.steps.map(s=>s.comandoOriginal),['0.15','432.00','528.00']);
-const uncertain=compile(row('440,M1,880'));
-assert.equal(uncertain.code,'mixed');assert.equal(uncertain.steps[1].hz,null);assert(uncertain.steps[1].referenceHz>20000);
+const uncertain=compile(row('440,INVALIDO,880'));
+assert.equal(uncertain.code,'mixed');assert.equal(uncertain.steps[1].hz,null);
 assert.equal(uncertain.summary.external,0);assert.equal(uncertain.summary.pending,1);
 const specific={id:'explicit-test',confirmed:true,source:'Synthetic regression preset, not V7',harmonicDivisor:1e22};
 const mapped=compile(row('M1'),specific);assert.equal(mapped.code,'audio');assert(Math.abs(mapped.steps[0].hz-22.523430883)<1e-10);
 assert.equal(mapped.steps[0].comandoOriginal,'M1');assert.equal(mapped.steps[0].conversion.fundamentalHz,2.2523430883e23);
-assert.equal(compile(row('M1'),{id:'unverified'}).code,'pending');
+assert.equal(compile(row('M1'),{id:'unverified'}).code,'external');
 assert.equal(compile(row('100-25000')).code,'external');
 assert.equal(compile(row('20000')).code,'audio');
 assert.equal(compile(row('440 G1,880,100 G0')).steps[1].statusExecucao,STEP_STATUS.pending);
@@ -32,7 +32,11 @@ const lowRate=new Player(()=>{},()=>{const c=factory();c.sampleRate=32000;return
 lowRate.load(compile(row('440,19000,880')));await lowRate.play();assert.deepEqual(frequencies.slice(-2),[440,880]);assert.equal(lowRate.duration(),2);lowRate.stop();
 p.load(compile(row('25000,0.15')));const before=opened;await p.play();assert.equal(opened,before);assert.equal(p.state,'blocked');
 p.load(compile(row('440,0=2,25000,880')));await p.play();assert.equal(p.duration(),4);assert.deepEqual(frequencies.slice(-2),[440,880]);p.stop();
-const both=compile([0,'test','RRMD',[],'M1',0,180,1]);assert.equal(both.code,'pending');assert.equal(both.summary.hardware,1);assert.match(both.steps[0].observacao,/Também requer saída externa/);
+const both=compile([0,'test','RRMD',[],'M1',0,180,1]);assert.equal(both.code,'external');assert.equal(both.summary.hardware,1);assert.match(both.steps[0].observacao,/saída simultânea/);
 console.log('PASS: original Hz, inactive stages take no time, first/middle/end restrictions, pause/resume, programmed rests, device limits, no output for wholly restricted programs');
 
 p.load(compile(row('440,25000')));await p.play();assert.equal(p.duration(),1);ctx.currentTime=1.04;p.tick();assert.equal(p.state,'finished');assert.match(state.message,/parcial/);assert.deepEqual(state.skipped,[2]);
+
+assert.equal(compile(row('BL29901')).steps[0].hz,155518226281848000/29900);
+assert.equal(compile(row('M1'),{confirmed:false}).steps[0].hz,2.2523430883e23);
+assert.equal(compile(row('M1'),{frequencyFactor:NaN}).code,'pending');
